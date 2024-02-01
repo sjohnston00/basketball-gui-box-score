@@ -1,0 +1,17 @@
+{
+  "name": "basketball-stats-tracker",
+  "version": "1.0.0",
+  "private": true,
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "css:dev": "tailwindcss -i ./tailwind.css -o ./styles.css --watch",
+    "css:build": "tailwindcss -i ./tailwind.css -o ./styles.css"
+  },
+  "keywords": [],
+  "author": "Sam Johnston",
+  "license": "ISC",
+  "devDependencies": {
+    "tailwindcss": "^3.4.1"
+  }
+}
