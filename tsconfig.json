@@ -1,0 +1,15 @@
+{
+  "include": ["**/*.ts"],
+  "compilerOptions": {
+    "module": "ES2020",
+    "lib": ["DOM", "DOM.Iterable", "ES2020"],
+    "isolatedModules": true,
+    "esModuleInterop": true,
+    "moduleResolution": "node",
+    "resolveJsonModule": true,
+    "target": "ES2019",
+    "strict": true,
+    "allowJs": true,
+    "forceConsistentCasingInFileNames": true
+  }
+}
