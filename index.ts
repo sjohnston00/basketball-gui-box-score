@@ -1,5 +1,40 @@
 'use strict'
 import { faker } from '@faker-js/faker'
+import localforage from 'localforage'
+
+const teamsDb = localforage.createInstance({
+  description: 'basketball-tracker-db',
+  driver: localforage.INDEXEDDB,
+  name: 'basketball-tracker-db',
+  storeName: 'teams',
+  version: 1
+})
+
+const playersDb = localforage.createInstance({
+  description: 'basketball-tracker-db',
+  driver: localforage.INDEXEDDB,
+  name: 'basketball-tracker-db',
+  storeName: 'players',
+  version: 1
+})
+
+teamsDb.getItem('game_data').then(function (value) {
+  console.log(value)
+})
+playersDb.getItem('game_data').then(function (value) {
+  console.log(value)
+})
+
+const newPlayerTeamSelect = document.getElementById(
+  'player-team-id'
+) as HTMLSelectElement
+
+teamsDb.iterate(function (value: { name: string; abbvr: string }, key) {
+  const option = document.createElement('option')
+  option.value = key
+  option.textContent = value.name
+  newPlayerTeamSelect.appendChild(option)
+})
 
 const game_data = {
   team1: {
@@ -16,6 +51,79 @@ const missedShotMarkers = document.getElementById('missed-shot-markers')
 const clearMarkersButton = document.getElementById('clear-markers-button')
 const team1FinalScoreSpan = document.getElementById('team-1-final-score')
 const team2FinalScoreSpan = document.getElementById('team-2-final-score')
+const addPlayerForm = document.getElementById(
+  'add-player-form'
+) as HTMLFormElement
+const addTeamForm = document.getElementById('new-team-form') as HTMLFormElement
+const addPlayerButton = document.getElementById(
+  'add-player-button'
+) as HTMLButtonElement
+
+addPlayerForm.onsubmit = async (event) => {
+  event.preventDefault()
+  const playerNameInput = document.getElementById(
+    'player-name-input'
+  ) as HTMLInputElement
+  const playerNumberInput = document.getElementById(
+    'player-number-input'
+  ) as HTMLInputElement
+
+  const playerName = playerNameInput.value
+  const playerNumber = playerNumberInput.value
+  const playerTeamId = newPlayerTeamSelect.value
+
+  const player = {
+    name: playerName,
+    number: playerNumber,
+    teamId: playerTeamId
+  }
+
+  const playerId = `player${window.crypto.randomUUID().replaceAll('-', '')}`
+  await playersDb.setItem(playerId, player)
+  addPlayerForm.reset()
+  playerNameInput.focus()
+}
+
+addTeamForm.onsubmit = async (event) => {
+  event.preventDefault()
+
+  const teamNameInput = document.getElementById(
+    'team-name-input'
+  ) as HTMLInputElement
+  const teamAbbvrInput = document.getElementById(
+    'team-name-abbvr-input'
+  ) as HTMLInputElement
+
+  const teamName = teamNameInput.value
+  const teamAbbvr = teamAbbvrInput.value
+
+  //check team name already exists
+  let teamNameExists = false
+  await teamsDb.iterate(function (value: { name: string; abbvr: string }, key) {
+    if (value.name === teamName) {
+      teamNameExists = true
+      alert('Team name already exists')
+      teamNameInput.focus()
+      return
+    }
+  })
+
+  if (teamNameExists) return
+
+  const team = {
+    name: teamName,
+    abbvr: teamAbbvr
+  }
+
+  const teamId = `team${window.crypto.randomUUID().replaceAll('-', '')}`
+  await teamsDb.setItem(teamId, team)
+  const option = document.createElement('option')
+  option.value = teamId
+  option.textContent = team.name
+  newPlayerTeamSelect.appendChild(option)
+  addTeamForm.reset()
+  teamNameInput.focus()
+}
 
 const viewBox = svg.getAttribute('viewBox').split(' ')
 
