@@ -8,42 +8,64 @@
   </head>
   <body class="max-w-7xl mx-auto px-4">
     <h1>Basketball tracker</h1>
-    <h2>New Team</h2>
-    <form id="new-team-form" class="mb-8">
-      <label for="team-name-input">Name</label>
-      <input type="text" name="team-name-input" id="team-name-input" required />
-      <label for="team-name-abbvr-input">Abbreviation</label>
-      <input
-        type="text"
-        name="team-name-abbvr-input"
-        id="team-name-abbvr-input"
-        required
-      />
-      <button id="add-team-button">Add Team</button>
-    </form>
-    <h2>New Player</h2>
-    <form id="add-player-form">
-      <label for="player-name-input">Name</label>
-      <input
-        type="text"
-        name="player-name-input"
-        id="player-name-input"
-        required
-      />
-      <label for="player-number-input">Player number</label>
-      <input
-        type="number"
-        name="player-number-input"
-        id="player-number-input"
-        min="0"
-        max="99"
-        required
-      />
-      <select name="player-team-id" id="player-team-id">
-        <option value="">Select a team</option>
-      </select>
-      <button id="add-player-button">Add</button>
-    </form>
+    <div class="flex justify-between">
+      <div>
+        <h2>New Team</h2>
+        <form id="new-team-form" class="mb-8">
+          <label for="team-name-input">Name</label>
+          <input
+            type="text"
+            name="team-name-input"
+            id="team-name-input"
+            required
+          />
+          <label for="team-name-abbvr-input">Abbreviation</label>
+          <input
+            type="text"
+            name="team-name-abbvr-input"
+            id="team-name-abbvr-input"
+            required
+          />
+          <button id="add-team-button">Add Team</button>
+        </form>
+        <h2>New Player</h2>
+        <form id="add-player-form">
+          <label for="player-name-input">Name</label>
+          <input
+            type="text"
+            name="player-name-input"
+            id="player-name-input"
+            required
+          />
+          <label for="player-number-input">Player number</label>
+          <input
+            type="number"
+            name="player-number-input"
+            id="player-number-input"
+            min="0"
+            max="99"
+            required
+          />
+          <select name="player-team-id" id="player-team-id">
+            <option value="">Select a team</option>
+          </select>
+          <button id="add-player-button">Add</button>
+        </form>
+      </div>
+      <div>
+        <h2>Teams</h2>
+        <table id="teams-table">
+          <thead>
+            <tr>
+              <th>Name</th>
+              <th>Abbreviation</th>
+              <th>Players</th>
+            </tr>
+          </thead>
+          <tbody id="teams-table-tbody"></tbody>
+        </table>
+      </div>
+    </div>
 
     <button id="clear-markers-button">Clear</button>
     <div class="flex gap-4 mb-8">
