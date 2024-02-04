@@ -2,8 +2,10 @@ import { faker } from '@faker-js/faker'
 import { createTeam, getTeams } from './src/teams'
 import { Team } from './src/types/team'
 import { createPlayer } from './src/players'
+import { initialiseCanvas } from './src/courtCanvas'
 
 async function main() {
+  const { basketballCourtCanvas, basketballCourtCtx } = initialiseCanvas()
   let teams = await getTeams()
   renderTeamsTable(teams)
   renderTeamsSelectOptions(teams)
@@ -25,6 +27,7 @@ async function main() {
   const team2FinalScoreSpan = document.getElementById('team-2-final-score')
   const addPlayerForm = document.getElementById('add-player-form') as HTMLFormElement
   const addTeamForm = document.getElementById('new-team-form') as HTMLFormElement
+  const addShotForm = document.getElementById('add-shot-form') as HTMLFormElement
 
   addPlayerForm.onsubmit = async (event) => {
     event.preventDefault()
@@ -99,6 +102,10 @@ async function main() {
   const svgViewBoxHeight = Number(viewBox[3])
 
   svg.addEventListener('click', function (event) {
+    const dialog = document.getElementById('add-shot-dialog') as HTMLDialogElement
+    dialog.showModal()
+
+    //TODO move the adding off the marker based of the form submission of the #add-shot-form
     const x = event.offsetX
     const y = event.offsetY
 
@@ -402,3 +409,4 @@ function renderTeamsSelectOptions(teams: Team[]) {
 }
 
 main()
+

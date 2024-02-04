@@ -6,7 +6,7 @@
     <link rel="stylesheet" href="/styles.css" />
     <title>Basketball tracker</title>
   </head>
-  <body class="max-w-7xl mx-auto px-4">
+  <body class="max-w-7xl mx-auto px-4 bg-neutral-900 text-white">
     <h1>Basketball tracker</h1>
     <div class="flex justify-between">
       <div>
@@ -50,6 +50,10 @@
           <tbody id="teams-table-tbody"></tbody>
         </table>
       </div>
+    </div>
+
+    <div class="my-4">
+      <canvas id="basketball-court"></canvas>
     </div>
 
     <button id="clear-markers-button">Clear</button>
@@ -297,6 +301,21 @@
         </table>
       </div>
     </div>
+    <dialog id="add-shot-dialog" class="w-72 p-4">
+      <h1>Add shot</h1>
+      <form id="add-shot-form" method="dialog">
+        <label>
+          <input type="radio" name="shot-made" id="missed-shot" value="true" />
+          make
+        </label>
+        <label>
+          <input type="radio" name="shot-made" id="missed-shot" value="false" />
+          miss
+        </label>
+        <button>add</button>
+      </form>
+    </dialog>
   </body>
   <script type="module" src="/index.js"></script>
 </html>
+
