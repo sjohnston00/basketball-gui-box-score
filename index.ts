@@ -5,6 +5,74 @@ import { createPlayer } from './src/players'
 import { initialiseCanvas } from './src/courtCanvas'
 
 async function main() {
+  type SvgInHtml = HTMLElement & SVGElement
+
+  const halfCourtSVG = document.getElementById('half-court') as SvgInHtml
+  const halfCourtBasketCircle = document.getElementById('half-court-basket') as SVGCircleElement
+  const halfCourtStatusText = document.getElementById('status-text') as HTMLSpanElement
+
+  halfCourtSVG.addEventListener('mousemove', (e) => {
+    if (e.movementX === 0 && e.movementY === 0) return
+    halfCourtSVG.removeChild(halfCourtSVG.lastChild)
+    halfCourtSVG.removeChild(halfCourtSVG.lastChild)
+    console.log({
+      x: e.x,
+      clientX: e.clientX,
+      pageX: e.pageX,
+      offsetX: e.offsetX,
+      movementX: e.movementX,
+      screenX: e.screenX,
+      y: e.y,
+      clientY: e.clientY,
+      pageY: e.pageY,
+      offsetY: e.offsetY,
+      movementY: e.movementY,
+      screenY: e.screenY,
+    })
+
+    const x = e.offsetX
+    const y = e.offsetY
+
+    const xScale = halfCourtSVG.clientWidth / halfCourtSVG.viewBox.baseVal.width
+    const yScale = halfCourtSVG.clientHeight / halfCourtSVG.viewBox.baseVal.height
+
+    const rectWidth = 10
+    const rectHeight = 10
+
+    const pointerX = x / xScale
+    const pointerY = y / yScale
+
+    const rectX = pointerX - rectWidth / 2
+    const rectY = pointerY - rectHeight / 2
+
+    const rect = document.createElementNS('http://www.w3.org/2000/svg', 'rect')
+    rect.setAttribute('x', rectX)
+    rect.setAttribute('y', rectY)
+    rect.setAttribute('height', 10)
+    rect.setAttribute('width', 10)
+    rect.setAttribute('fill', 'red')
+    rect.setAttribute('id', 'pointer')
+
+    //Draw an svg line from the pointer to the halfCourtBasketCircle
+    const line = document.createElementNS('http://www.w3.org/2000/svg', 'line')
+    line.setAttribute('x1', pointerX)
+    line.setAttribute('y1', pointerY)
+    line.setAttribute('x2', '214')
+    line.setAttribute('y2', '45.5')
+    line.setAttribute('stroke', 'red')
+    halfCourtSVG.appendChild(line)
+    halfCourtSVG.appendChild(rect)
+
+    if (pointerX < 27 && pointerY < 85) {
+      halfCourtStatusText.textContent = `x: ${pointerX} y: ${pointerY} Left side 3pt`
+    } else if (pointerX > 399 && pointerY < 85) {
+      halfCourtStatusText.textContent = `x: ${pointerX} y: ${pointerY} Right side 3pt`
+    } else {
+      //TODO: run equation to check distance between the basket and the pointer if its longer then the radius of the circle then its a 3pt
+      halfCourtStatusText.textContent = `x: ${pointerX} y: ${pointerY} Check 3pt eligibility`
+    }
+  })
+
   const { basketballCourtCanvas, basketballCourtCtx } = initialiseCanvas()
   let teams = await getTeams()
   renderTeamsTable(teams)
