@@ -286,13 +286,9 @@ function drawTable(players: Player[]) {
     row.appendChild(threePointersMadeCell)
 
     const playersShots = shots.filter((p) => p.playerNumber === player.number)
-    const playerTwoPointersAttempted = playersShots.filter(
-      (s) => !isThreePointer(s.x, s.y) && !s.made
-    )
+    const playerTwoPointersAttempted = playersShots.filter((s) => !isThreePointer(s.x, s.y))
     const playerTwoPointersMade = playersShots.filter((s) => !isThreePointer(s.x, s.y) && s.made)
-    const playerThreePointersAttempted = playersShots.filter(
-      (s) => isThreePointer(s.x, s.y) && !s.made
-    )
+    const playerThreePointersAttempted = playersShots.filter((s) => isThreePointer(s.x, s.y))
     const playerThreePointersMade = playersShots.filter((s) => isThreePointer(s.x, s.y) && s.made)
 
     twoPointersAttemptedCell.textContent = playerTwoPointersAttempted.length.toString()
