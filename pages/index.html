@@ -379,11 +379,31 @@
         </table>
       </div>
     </div>
-    <label class="text-black">
-      Show Debug info
-      <input type="checkbox" name="showCanvasDebugLines" id="showCanvasDebugLines" />
-    </label>
-    <canvas id="court-canvas" height="400" width="500"></canvas>
+    <div class="flex gap-2">
+      <div>
+        <label class="text-black">
+          Show Debug info
+          <input type="checkbox" name="showCanvasDebugLines" id="showCanvasDebugLines" />
+        </label>
+        <canvas id="court-canvas" height="400" width="500"></canvas>
+      </div>
+      <div class="text-black">
+        <h1>Stats</h1>
+        <table class="w-full">
+          <thead>
+            <tr>
+              <th>PTS</th>
+              <th>Name</th>
+              <th>2PA</th>
+              <th>2PM</th>
+              <th>3PA</th>
+              <th>3PM</th>
+            </tr>
+          </thead>
+          <tbody id="stats-tbody"></tbody>
+        </table>
+      </div>
+    </div>
     <dialog id="add-shot-dialog" class="w-72 md:w-96 p-4">
       <div class="flex justify-between items-center gap-2 mb-5">
         <h1>Add shot</h1>

@@ -1,5 +1,11 @@
+import { th } from '@faker-js/faker'
+
 document.body.style.backgroundColor = '#eeeeee'
 
+type Player = {
+  name: string
+  number: number
+}
 const players = [
   {
     name: 'Sam Johnston',
@@ -19,13 +25,25 @@ const players = [
   },
 ]
 
+type Shot = {
+  made: boolean
+  x: number
+  y: number
+  player: string
+  playerNumber: number
+}
+const shots: Shot[] = []
+
 const addShotDialog = document.querySelector('#add-shot-dialog') as HTMLDialogElement
 const addShotForm = document.querySelector('#add-shot-form') as HTMLFormElement
 const showDebugLines = document.querySelector('#showCanvasDebugLines') as HTMLInputElement
 const playersDiv = document.querySelector('#players') as HTMLDivElement
+const statsTable = document.querySelector('#stats-tbody') as HTMLTableElement
 
 for (let index = 0; index < players.length; index++) {
   const player = players[index]
+
+  //add player button to dialog
   const playerButton = document.createElement('button')
   playerButton.style.textAlign = 'center'
   playerButton.style.display = 'flex'
@@ -43,6 +61,8 @@ for (let index = 0; index < players.length; index++) {
   playersDiv.appendChild(playerButton)
 }
 
+drawTable(players)
+
 const coordsSpan = document.createElement('span')
 coordsSpan.style.display = 'block'
 coordsSpan.style.color = 'black'
@@ -58,14 +78,9 @@ const hoverState = {
   x: undefined,
   y: undefined,
 }
-type Shot = {
-  made: boolean
-  x: number
-  y: number
-  player: string
-  playerNumber: number
-}
-const shots: Shot[] = []
+
+let highlightedPlayer: number | undefined
+
 const DISTANCE_TO_BASKET = 197
 
 function draw() {
@@ -112,8 +127,13 @@ function draw() {
   ctx.fill()
   ctx.closePath()
 
-  for (let index = 0; index < shots.length; index++) {
-    const shot = shots[index]
+  const shotsToDisplay =
+    highlightedPlayer !== undefined
+      ? shots.filter((shot) => shot.playerNumber === highlightedPlayer)
+      : shots
+
+  for (let index = 0; index < shotsToDisplay.length; index++) {
+    const shot = shotsToDisplay[index]
     const height = 10
     const width = 10
     const rectX = shot.x - height / 2
@@ -195,6 +215,7 @@ function registerEventListerners() {
     }
     shots.push(shot)
     addShotForm.reset()
+    drawTable(players)
     addShotDialog.close()
   })
 
@@ -224,6 +245,66 @@ function threePointerDistance(x: number, y: number) {
   const triangleWidth = Math.abs(x - 220)
   const calculation = Math.pow(triangleHeight, 2) + Math.pow(triangleWidth, 2)
   return Math.sqrt(calculation)
+}
+
+function drawTable(players: Player[]) {
+  while (statsTable.firstChild) {
+    statsTable.firstChild.removeEventListener('mouseover', () => {})
+    statsTable.firstChild.removeEventListener('mouseout', () => {})
+    statsTable.removeChild(statsTable.firstChild)
+  }
+
+  for (let index = 0; index < players.length; index++) {
+    const player = players[index]
+
+    //add an event listeners for hovering on the row, this will only show all shots of the current hovered player
+    const row = document.createElement('tr')
+    row.addEventListener('mouseover', (e) => {
+      highlightedPlayer = player.number
+      row.style.backgroundColor = '#ffffff'
+    })
+    row.addEventListener('mouseout', (e) => {
+      highlightedPlayer = undefined
+      row.style.backgroundColor = 'initial'
+    })
+    const nameCell = document.createElement('td')
+    nameCell.textContent = player.name
+    const twoPointersAttemptedCell = document.createElement('td')
+    const twoPointersMadeCell = document.createElement('td')
+    const threePointersAttemptedCell = document.createElement('td')
+
+    const threePointersMadeCell = document.createElement('td')
+    threePointersMadeCell.textContent = '0'
+    const pointsCell = document.createElement('td')
+    pointsCell.textContent = '0'
+
+    row.appendChild(pointsCell)
+    row.appendChild(nameCell)
+    row.appendChild(twoPointersAttemptedCell)
+    row.appendChild(twoPointersMadeCell)
+    row.appendChild(threePointersAttemptedCell)
+    row.appendChild(threePointersMadeCell)
+
+    const playersShots = shots.filter((p) => p.playerNumber === player.number)
+    const playerTwoPointersAttempted = playersShots.filter(
+      (s) => !isThreePointer(s.x, s.y) && !s.made
+    )
+    const playerTwoPointersMade = playersShots.filter((s) => !isThreePointer(s.x, s.y) && s.made)
+    const playerThreePointersAttempted = playersShots.filter(
+      (s) => isThreePointer(s.x, s.y) && !s.made
+    )
+    const playerThreePointersMade = playersShots.filter((s) => isThreePointer(s.x, s.y) && s.made)
+
+    twoPointersAttemptedCell.textContent = playerTwoPointersAttempted.length.toString()
+    twoPointersMadeCell.textContent = playerTwoPointersMade.length.toString()
+    threePointersAttemptedCell.textContent = playerThreePointersAttempted.length.toString()
+    threePointersMadeCell.textContent = playerThreePointersMade.length.toString()
+    const twoPointersPoints = playerTwoPointersMade.reduce((acc, cur) => acc + 2, 0)
+    const threePointersPoints = playerThreePointersMade.reduce((acc, cur) => acc + 3, 0)
+    pointsCell.textContent = (threePointersPoints + twoPointersPoints).toString()
+
+    statsTable.appendChild(row)
+  }
 }
 
 window.requestAnimationFrame(draw)
