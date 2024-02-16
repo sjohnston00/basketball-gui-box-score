@@ -381,10 +381,16 @@
     </div>
     <div class="flex gap-2">
       <div>
-        <label class="text-black">
-          Show Debug info
-          <input type="checkbox" name="showCanvasDebugLines" id="showCanvasDebugLines" />
-        </label>
+        <div class="flex items-center justify-between">
+          <label class="text-black">
+            Show Debug info
+            <input type="checkbox" name="showCanvasDebugLines" id="showCanvasDebugLines" />
+          </label>
+          <label class="text-black">
+            Show Hot Zones
+            <input type="checkbox" name="showHotZoneLines" id="showHotZoneLines" checked />
+          </label>
+        </div>
         <canvas id="court-canvas" height="400" width="500"></canvas>
       </div>
       <div class="text-black flex-1">

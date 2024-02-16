@@ -37,6 +37,7 @@ const shots: Shot[] = []
 const addShotDialog = document.querySelector('#add-shot-dialog') as HTMLDialogElement
 const addShotForm = document.querySelector('#add-shot-form') as HTMLFormElement
 const showDebugLines = document.querySelector('#showCanvasDebugLines') as HTMLInputElement
+const showHotZoneLines = document.querySelector('#showHotZoneLines') as HTMLInputElement
 const playersDiv = document.querySelector('#players') as HTMLDivElement
 const statsTableTbody = document.querySelector('#stats-table-tbody') as HTMLTableElement
 const statsTableFooter = document.querySelector('#stats-table-tfoot') as HTMLTableElement
@@ -165,6 +166,9 @@ function draw() {
     ctx.lineTo(220, 42)
     ctx.stroke()
     ctx.closePath()
+  }
+  if (showHotZoneLines) {
+    //TODO: Draw the hot zone lines from the figma file
   }
   window.requestAnimationFrame(draw)
 }
