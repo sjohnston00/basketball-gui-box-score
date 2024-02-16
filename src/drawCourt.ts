@@ -8,7 +8,7 @@ type Player = {
 }
 const players = [
   {
-    name: 'Sam Johnston',
+    name: 'Andrew',
     number: 0,
   },
   {
@@ -20,7 +20,7 @@ const players = [
     number: 6,
   },
   {
-    name: 'Jon Pillow',
+    name: 'Jon',
     number: 9,
   },
 ]
@@ -38,7 +38,8 @@ const addShotDialog = document.querySelector('#add-shot-dialog') as HTMLDialogEl
 const addShotForm = document.querySelector('#add-shot-form') as HTMLFormElement
 const showDebugLines = document.querySelector('#showCanvasDebugLines') as HTMLInputElement
 const playersDiv = document.querySelector('#players') as HTMLDivElement
-const statsTable = document.querySelector('#stats-tbody') as HTMLTableElement
+const statsTableTbody = document.querySelector('#stats-table-tbody') as HTMLTableElement
+const statsTableFooter = document.querySelector('#stats-table-tfoot') as HTMLTableElement
 
 for (let index = 0; index < players.length; index++) {
   const player = players[index]
@@ -248,11 +249,21 @@ function threePointerDistance(x: number, y: number) {
 }
 
 function drawTable(players: Player[]) {
-  while (statsTable.firstChild) {
-    statsTable.firstChild.removeEventListener('mouseover', () => {})
-    statsTable.firstChild.removeEventListener('mouseout', () => {})
-    statsTable.removeChild(statsTable.firstChild)
+  while (statsTableTbody.firstChild) {
+    statsTableTbody.firstChild.removeEventListener('mouseover', () => {})
+    statsTableTbody.firstChild.removeEventListener('mouseout', () => {})
+    statsTableTbody.removeChild(statsTableTbody.firstChild)
   }
+
+  while (statsTableFooter.firstChild) {
+    statsTableFooter.removeChild(statsTableFooter.firstChild)
+  }
+
+  let teamPointsTotal = 0
+  let teamTwoPointersAttemptedTotal = 0
+  let teamTwoPointersMadeTotal = 0
+  let teamThreePointersAttemptedTotal = 0
+  let teamThreePointersMadeTotal = 0
 
   for (let index = 0; index < players.length; index++) {
     const player = players[index]
@@ -261,48 +272,132 @@ function drawTable(players: Player[]) {
     const row = document.createElement('tr')
     row.addEventListener('mouseover', (e) => {
       highlightedPlayer = player.number
-      row.style.backgroundColor = '#ffffff'
+      row.classList.add('!bg-gray-600', 'text-white')
     })
     row.addEventListener('mouseout', (e) => {
       highlightedPlayer = undefined
-      row.style.backgroundColor = 'initial'
+      row.classList.remove('!bg-gray-600', 'text-white')
     })
     const nameCell = document.createElement('td')
-    nameCell.textContent = player.name
+    const pointsCell = document.createElement('td')
+
     const twoPointersAttemptedCell = document.createElement('td')
     const twoPointersMadeCell = document.createElement('td')
+    const twoPointersPercentage = document.createElement('td')
+
     const threePointersAttemptedCell = document.createElement('td')
-
     const threePointersMadeCell = document.createElement('td')
-    threePointersMadeCell.textContent = '0'
-    const pointsCell = document.createElement('td')
-    pointsCell.textContent = '0'
+    const threePointersPercentage = document.createElement('td')
 
-    row.appendChild(pointsCell)
+    const fieldGoalsAttemptedCell = document.createElement('td')
+    const fieldGoalsMadeCell = document.createElement('td')
+    const fieldGoalsPercentageCell = document.createElement('td')
+
+    nameCell.classList.add('text-left')
+
     row.appendChild(nameCell)
-    row.appendChild(twoPointersAttemptedCell)
+    row.appendChild(pointsCell)
     row.appendChild(twoPointersMadeCell)
-    row.appendChild(threePointersAttemptedCell)
+    row.appendChild(twoPointersAttemptedCell)
+    row.appendChild(twoPointersPercentage)
     row.appendChild(threePointersMadeCell)
+    row.appendChild(threePointersAttemptedCell)
+    row.appendChild(threePointersPercentage)
+    row.appendChild(fieldGoalsMadeCell)
+    row.appendChild(fieldGoalsAttemptedCell)
+    row.appendChild(fieldGoalsPercentageCell)
 
     const playersShots = shots.filter((p) => p.playerNumber === player.number)
     const playerTwoPointersAttempted = playersShots.filter((s) => !isThreePointer(s.x, s.y))
     const playerTwoPointersMade = playersShots.filter((s) => !isThreePointer(s.x, s.y) && s.made)
     const playerThreePointersAttempted = playersShots.filter((s) => isThreePointer(s.x, s.y))
     const playerThreePointersMade = playersShots.filter((s) => isThreePointer(s.x, s.y) && s.made)
+    const playerTwoPointPercentage =
+      (playerTwoPointersMade.length / playerTwoPointersAttempted.length) * 100 || 0
+    const playerThreePointPercentage =
+      (playerThreePointersMade.length / playerThreePointersAttempted.length) * 100 || 0
 
+    nameCell.textContent = player.name
     twoPointersAttemptedCell.textContent = playerTwoPointersAttempted.length.toString()
     twoPointersMadeCell.textContent = playerTwoPointersMade.length.toString()
     threePointersAttemptedCell.textContent = playerThreePointersAttempted.length.toString()
     threePointersMadeCell.textContent = playerThreePointersMade.length.toString()
-    const twoPointersPoints = playerTwoPointersMade.reduce((acc, cur) => acc + 2, 0)
-    const threePointersPoints = playerThreePointersMade.reduce((acc, cur) => acc + 3, 0)
+    twoPointersPercentage.textContent = `${playerTwoPointPercentage.toFixed(0)}%`
+    threePointersPercentage.textContent = `${playerThreePointPercentage.toFixed(0)}%`
+    const twoPointersPoints = playerTwoPointersMade.length * 2
+    const threePointersPoints = playerThreePointersMade.length * 3
     pointsCell.textContent = (threePointersPoints + twoPointersPoints).toString()
 
-    statsTable.appendChild(row)
+    const fieldGoalsAttempted =
+      playerTwoPointersAttempted.length + playerThreePointersAttempted.length
+    const fieldGoalsMade = playerTwoPointersMade.length + playerThreePointersMade.length
+    const fieldGoalsPercentage = (fieldGoalsMade / fieldGoalsAttempted) * 100 || 0
+
+    fieldGoalsAttemptedCell.textContent = fieldGoalsAttempted.toString()
+    fieldGoalsMadeCell.textContent = fieldGoalsMade.toString()
+    fieldGoalsPercentageCell.textContent = `${fieldGoalsPercentage.toFixed(0)}%`
+
+    teamPointsTotal += threePointersPoints + twoPointersPoints
+    teamTwoPointersAttemptedTotal += playerTwoPointersAttempted.length
+    teamTwoPointersMadeTotal += playerTwoPointersMade.length
+    teamThreePointersAttemptedTotal += playerThreePointersAttempted.length
+    teamThreePointersMadeTotal += playerThreePointersMade.length
+
+    statsTableTbody.appendChild(row)
   }
+
+  const row = document.createElement('tr')
+  const teamNameCell = document.createElement('td')
+  const teamPointsCell = document.createElement('td')
+
+  const teamTwoPointersAttemptedCell = document.createElement('td')
+  const teamTwoPointersMadeCell = document.createElement('td')
+  const teamTwoPointersPercentage = document.createElement('td')
+
+  const teamThreePointersAttemptedCell = document.createElement('td')
+  const teamThreePointersMadeCell = document.createElement('td')
+  const teamThreePointersPercentage = document.createElement('td')
+
+  const teamFieldGoalsAttemptedCell = document.createElement('td')
+  const teamFieldGoalsMadeCell = document.createElement('td')
+  const teamFieldGoalsPercentageCell = document.createElement('td')
+
+  row.appendChild(teamNameCell)
+  row.appendChild(teamPointsCell)
+  row.appendChild(teamTwoPointersMadeCell)
+  row.appendChild(teamTwoPointersAttemptedCell)
+  row.appendChild(teamTwoPointersPercentage)
+  row.appendChild(teamThreePointersMadeCell)
+  row.appendChild(teamThreePointersAttemptedCell)
+  row.appendChild(teamThreePointersPercentage)
+  row.appendChild(teamFieldGoalsMadeCell)
+  row.appendChild(teamFieldGoalsAttemptedCell)
+  row.appendChild(teamFieldGoalsPercentageCell)
+
+  teamPointsCell.textContent = teamPointsTotal.toString()
+  teamNameCell.textContent = 'Total'
+  teamNameCell.classList.add('text-left')
+  teamTwoPointersAttemptedCell.textContent = teamTwoPointersAttemptedTotal.toString()
+  teamTwoPointersMadeCell.textContent = teamTwoPointersMadeTotal.toString()
+  teamThreePointersAttemptedCell.textContent = teamThreePointersAttemptedTotal.toString()
+  teamThreePointersMadeCell.textContent = teamThreePointersMadeTotal.toString()
+
+  const teamTwoPointPercentage =
+    (teamTwoPointersMadeTotal / teamTwoPointersAttemptedTotal) * 100 || 0
+  const teamThreePointPercentage =
+    (teamThreePointersMadeTotal / teamThreePointersAttemptedTotal) * 100 || 0
+  teamTwoPointersPercentage.textContent = `${teamTwoPointPercentage.toFixed(0)}%`
+  teamThreePointersPercentage.textContent = `${teamThreePointPercentage.toFixed(0)}%`
+
+  const teamFieldGoalsAttempted = teamTwoPointersAttemptedTotal + teamThreePointersAttemptedTotal
+  const teamFieldGoalsMade = teamTwoPointersMadeTotal + teamThreePointersMadeTotal
+  const teamFieldGoalsPercentage = (teamFieldGoalsMade / teamFieldGoalsAttempted) * 100 || 0
+  teamFieldGoalsAttemptedCell.textContent = teamFieldGoalsAttempted.toString()
+  teamFieldGoalsMadeCell.textContent = teamFieldGoalsMade.toString()
+  teamFieldGoalsPercentageCell.textContent = `${teamFieldGoalsPercentage.toFixed(0)}%`
+
+  statsTableFooter.appendChild(row)
 }
 
 window.requestAnimationFrame(draw)
 registerEventListerners()
-

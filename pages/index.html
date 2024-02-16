@@ -387,20 +387,26 @@
         </label>
         <canvas id="court-canvas" height="400" width="500"></canvas>
       </div>
-      <div class="text-black">
+      <div class="text-black flex-1">
         <h1>Stats</h1>
-        <table class="w-full">
+        <table class="w-full text-right" id="stats-table">
           <thead>
             <tr>
+              <th class="text-left">Name</th>
               <th>PTS</th>
-              <th>Name</th>
-              <th>2PA</th>
               <th>2PM</th>
-              <th>3PA</th>
+              <th>2PA</th>
+              <th>2P%</th>
               <th>3PM</th>
+              <th>3PA</th>
+              <th>3P%</th>
+              <th>FGM</th>
+              <th>FGA</th>
+              <th>FG%</th>
             </tr>
           </thead>
-          <tbody id="stats-tbody"></tbody>
+          <tbody id="stats-table-tbody"></tbody>
+          <tfoot id="stats-table-tfoot" class="font-bold"></tfoot>
         </table>
       </div>
     </div>
@@ -426,4 +432,3 @@
   </body>
   <script type="module" src="/index.js"></script>
 </html>
-
