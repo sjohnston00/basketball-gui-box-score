@@ -290,6 +290,9 @@ function draw() {
 
     ctx.fillText(`${middleRightKey2PointersPercentage}%`, 245, 110)
 
+    //TODO: finish hot zone percentages for curved areas
+    //NOTE: can simply calculate the rest by passing the isThreePointer function and adding some x & y guard rails
+
     ctx.beginPath()
     ctx.moveTo(219, 0)
     ctx.lineTo(219, 165)
