@@ -74,6 +74,7 @@ document.body.appendChild(coordsSpan)
 
 const canvas = document.getElementById('court-canvas') as HTMLCanvasElement
 canvas.style.backgroundColor = 'white'
+canvas.width = 438
 
 const ctx = canvas.getContext('2d')
 const hoverState = {
@@ -167,8 +168,154 @@ function draw() {
     ctx.stroke()
     ctx.closePath()
   }
-  if (showHotZoneLines) {
-    //TODO: Draw the hot zone lines from the figma file
+  if (showHotZoneLines.checked) {
+    //hot zones lines
+    //left corner 3
+    ctx.font = '16px monospace'
+    ctx.fillStyle = '#000000'
+    ctx.beginPath()
+    ctx.moveTo(0, 90)
+    ctx.lineTo(34, 90)
+    ctx.stroke()
+    ctx.closePath()
+
+    const leftCorner3Shots = shots.filter((shot) => isLeftCornerThreePointer(shot.x, shot.y))
+    const leftCorner3Made = leftCorner3Shots.filter((shot) => shot.made).length
+    const leftCorner3Attempted = leftCorner3Shots.length
+    const leftCorner3Percentage = ((leftCorner3Made / leftCorner3Attempted) * 100 || 0).toFixed(0)
+
+    ctx.save()
+    ctx.translate(25, 50)
+    ctx.rotate(-Math.PI / 2)
+    ctx.fillText(`${leftCorner3Percentage}%`, 0, 0)
+    ctx.restore()
+
+    //right corner 3
+    ctx.beginPath()
+    ctx.moveTo(405, 88)
+    ctx.lineTo(canvas.width, 88)
+    ctx.stroke()
+    ctx.closePath()
+
+    const rightCorner3Shots = shots.filter((shot) => isRightCornerThreePointer(shot.x, shot.y))
+    const rightCorner3Made = rightCorner3Shots.filter((shot) => shot.made).length
+    const rightCorner3Attempted = rightCorner3Shots.length
+    const rightCorner3Percentage = ((rightCorner3Made / rightCorner3Attempted) * 100 || 0).toFixed(
+      0
+    )
+
+    ctx.save()
+    ctx.translate(415, 30)
+    ctx.rotate(Math.PI / 2)
+    ctx.fillText(`${rightCorner3Percentage}%`, 0, 0)
+    ctx.restore()
+
+    //bottom left 2 pointer
+    ctx.beginPath()
+    ctx.moveTo(32, 50)
+    ctx.lineTo(405, 50)
+    ctx.stroke()
+    ctx.closePath()
+
+    const bottomLeft2PointerShots = shots.filter(
+      (shot) => shot.x > 34 && shot.x < 150 && shot.y < 50
+    )
+    const bottomLeft2PointersMade = bottomLeft2PointerShots.filter((shot) => shot.made).length
+    const bottomLeft2PointersAttempted = bottomLeft2PointerShots.length
+    const bottomLeft2PointersPercentage = (
+      (bottomLeft2PointersMade / bottomLeft2PointersAttempted) * 100 || 0
+    ).toFixed(0)
+
+    ctx.fillText(`${bottomLeft2PointersPercentage}%`, 80, 30)
+
+    //bottom right 2 pointer
+    const bottomRight2PointerShots = shots.filter(
+      (shot) => shot.x > 287 && shot.x < 405 && shot.y < 50
+    )
+    const bottomRight2PointersMade = bottomRight2PointerShots.filter((shot) => shot.made).length
+    const bottomRight2PointersAttempted = bottomRight2PointerShots.length
+    const bottomRight2PointersPercentage = (
+      (bottomRight2PointersMade / bottomRight2PointersAttempted) * 100 || 0
+    ).toFixed(0)
+
+    ctx.fillText(`${bottomRight2PointersPercentage}%`, 340, 30)
+
+    //bottom left key 2 pointer
+    const bottomLeftKey2PointerShots = shots.filter(
+      (shot) => shot.x > 150 && shot.x < 219 && shot.y < 50
+    )
+    const bottomLeftKey2PointersMade = bottomLeftKey2PointerShots.filter((shot) => shot.made).length
+    const bottomLeftKey2PointersAttempted = bottomLeftKey2PointerShots.length
+    const bottomLeftKey2PointersPercentage = (
+      (bottomLeftKey2PointersMade / bottomLeftKey2PointersAttempted) * 100 || 0
+    ).toFixed(0)
+    ctx.fillText(`${bottomLeftKey2PointersPercentage}%`, 175, 30)
+
+    //bottom right key 2 pointer
+    const bottomRightKey2PointerShots = shots.filter(
+      (shot) => shot.x > 218 && shot.x < 287 && shot.y < 50
+    )
+    const bottomRightKey2PointersMade = bottomRightKey2PointerShots.filter(
+      (shot) => shot.made
+    ).length
+    const bottomRightKey2PointersAttempted = bottomRightKey2PointerShots.length
+    const bottomRightKey2PointersPercentage = (
+      (bottomRightKey2PointersMade / bottomRightKey2PointersAttempted) * 100 || 0
+    ).toFixed(0)
+    ctx.fillText(`${bottomRightKey2PointersPercentage}%`, 245, 30)
+
+    //middle left key 2 pointer
+    const middleLeftKey2PointerShots = shots.filter(
+      (shot) => shot.x > 150 && shot.x < 219 && shot.y >= 50 && shot.y < 165
+    )
+    const middleLeftKey2PointersMade = middleLeftKey2PointerShots.filter((shot) => shot.made).length
+    const middleLeftKey2PointersAttempted = middleLeftKey2PointerShots.length
+    const middleLeftKey2PointersPercentage = (
+      (middleLeftKey2PointersMade / middleLeftKey2PointersAttempted) * 100 || 0
+    ).toFixed(0)
+
+    ctx.fillText(`${middleLeftKey2PointersPercentage}%`, 175, 110)
+
+    //middle right key 2 pointer
+    const middleRightKey2PointerShots = shots.filter(
+      (shot) => shot.x > 218 && shot.x < 287 && shot.y >= 50 && shot.y < 165
+    )
+    const middleRightKey2PointersMade = middleRightKey2PointerShots.filter(
+      (shot) => shot.made
+    ).length
+    const middleRightKey2PointersAttempted = middleRightKey2PointerShots.length
+    const middleRightKey2PointersPercentage = (
+      (middleRightKey2PointersMade / middleRightKey2PointersAttempted) * 100 || 0
+    ).toFixed(0)
+
+    ctx.fillText(`${middleRightKey2PointersPercentage}%`, 245, 110)
+
+    ctx.beginPath()
+    ctx.moveTo(219, 0)
+    ctx.lineTo(219, 165)
+    ctx.stroke()
+    ctx.closePath()
+
+    ctx.beginPath()
+    ctx.moveTo(150, 164)
+    ctx.lineTo(150, 400)
+    ctx.stroke()
+    ctx.closePath()
+
+    ctx.beginPath()
+    ctx.moveTo(287, 164)
+    ctx.lineTo(287, 400)
+    ctx.stroke()
+    ctx.closePath()
+
+    ctx.fillText('X%', 80, 110)
+
+    ctx.fillText('X%', 340, 110)
+
+    ctx.fillText('X%', 60, 210)
+    ctx.fillText('X%', 360, 210)
+    ctx.fillText('X%', 210, 200)
+    ctx.fillText('X%', 210, 270)
   }
   window.requestAnimationFrame(draw)
 }
@@ -183,9 +330,10 @@ function registerEventListerners() {
 
     const distance = threePointerDistance(x, y)
     const distanceFixed = distance.toFixed(2)
+    const threePointer = isThreePointer(x, y)
 
     if (!showDebugLines.checked) return
-    coordsSpan.textContent = `x: ${e.offsetX}, y: ${e.offsetY}, distance: ${distanceFixed}, isThreePointer: ${distance >= DISTANCE_TO_BASKET}`
+    coordsSpan.textContent = `x: ${e.offsetX}, y: ${e.offsetY}, distance: ${distanceFixed}, isThreePointer: ${threePointer}`
   })
 
   // canvas.addEventListener('mouseleave', (e) => {
@@ -231,10 +379,10 @@ function registerEventListerners() {
 }
 
 function isThreePointer(x: number, y: number): boolean {
-  if (x < 34 && y < 90) {
+  if (isLeftCornerThreePointer(x, y)) {
     return true
   }
-  if (x > 405 && y < 90) {
+  if (isRightCornerThreePointer(x, y)) {
     return true
   }
 
@@ -245,6 +393,15 @@ function isThreePointer(x: number, y: number): boolean {
   }
   return false
 }
+
+function isLeftCornerThreePointer(x: number, y: number): boolean {
+  return x < 34 && y < 90
+}
+
+function isRightCornerThreePointer(x: number, y: number): boolean {
+  return x > 405 && y < 90
+}
+
 function threePointerDistance(x: number, y: number) {
   const triangleHeight = Math.abs(y - 42)
   const triangleWidth = Math.abs(x - 220)
