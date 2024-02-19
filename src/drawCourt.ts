@@ -179,7 +179,9 @@ function draw() {
     ctx.stroke()
     ctx.closePath()
 
-    const leftCorner3Shots = shots.filter((shot) => isLeftCornerThreePointer(shot.x, shot.y))
+    const leftCorner3Shots = shotsToDisplay.filter((shot) =>
+      isLeftCornerThreePointer(shot.x, shot.y)
+    )
     const leftCorner3Made = leftCorner3Shots.filter((shot) => shot.made).length
     const leftCorner3Attempted = leftCorner3Shots.length
     const leftCorner3Percentage = ((leftCorner3Made / leftCorner3Attempted) * 100 || 0).toFixed(0)
@@ -197,7 +199,9 @@ function draw() {
     ctx.stroke()
     ctx.closePath()
 
-    const rightCorner3Shots = shots.filter((shot) => isRightCornerThreePointer(shot.x, shot.y))
+    const rightCorner3Shots = shotsToDisplay.filter((shot) =>
+      isRightCornerThreePointer(shot.x, shot.y)
+    )
     const rightCorner3Made = rightCorner3Shots.filter((shot) => shot.made).length
     const rightCorner3Attempted = rightCorner3Shots.length
     const rightCorner3Percentage = ((rightCorner3Made / rightCorner3Attempted) * 100 || 0).toFixed(
@@ -217,7 +221,7 @@ function draw() {
     ctx.stroke()
     ctx.closePath()
 
-    const bottomLeft2PointerShots = shots.filter(
+    const bottomLeft2PointerShots = shotsToDisplay.filter(
       (shot) => shot.x > 34 && shot.x < 150 && shot.y < 50
     )
     const bottomLeft2PointersMade = bottomLeft2PointerShots.filter((shot) => shot.made).length
@@ -229,7 +233,7 @@ function draw() {
     ctx.fillText(`${bottomLeft2PointersPercentage}%`, 80, 30)
 
     //bottom right 2 pointer
-    const bottomRight2PointerShots = shots.filter(
+    const bottomRight2PointerShots = shotsToDisplay.filter(
       (shot) => shot.x > 287 && shot.x < 405 && shot.y < 50
     )
     const bottomRight2PointersMade = bottomRight2PointerShots.filter((shot) => shot.made).length
@@ -241,7 +245,7 @@ function draw() {
     ctx.fillText(`${bottomRight2PointersPercentage}%`, 340, 30)
 
     //bottom left key 2 pointer
-    const bottomLeftKey2PointerShots = shots.filter(
+    const bottomLeftKey2PointerShots = shotsToDisplay.filter(
       (shot) => shot.x > 150 && shot.x < 219 && shot.y < 50
     )
     const bottomLeftKey2PointersMade = bottomLeftKey2PointerShots.filter((shot) => shot.made).length
@@ -252,7 +256,7 @@ function draw() {
     ctx.fillText(`${bottomLeftKey2PointersPercentage}%`, 175, 30)
 
     //bottom right key 2 pointer
-    const bottomRightKey2PointerShots = shots.filter(
+    const bottomRightKey2PointerShots = shotsToDisplay.filter(
       (shot) => shot.x > 218 && shot.x < 287 && shot.y < 50
     )
     const bottomRightKey2PointersMade = bottomRightKey2PointerShots.filter(
@@ -265,7 +269,7 @@ function draw() {
     ctx.fillText(`${bottomRightKey2PointersPercentage}%`, 245, 30)
 
     //middle left key 2 pointer
-    const middleLeftKey2PointerShots = shots.filter(
+    const middleLeftKey2PointerShots = shotsToDisplay.filter(
       (shot) => shot.x > 150 && shot.x < 219 && shot.y >= 50 && shot.y < 165
     )
     const middleLeftKey2PointersMade = middleLeftKey2PointerShots.filter((shot) => shot.made).length
@@ -277,7 +281,7 @@ function draw() {
     ctx.fillText(`${middleLeftKey2PointersPercentage}%`, 175, 110)
 
     //middle right key 2 pointer
-    const middleRightKey2PointerShots = shots.filter(
+    const middleRightKey2PointerShots = shotsToDisplay.filter(
       (shot) => shot.x > 218 && shot.x < 287 && shot.y >= 50 && shot.y < 165
     )
     const middleRightKey2PointersMade = middleRightKey2PointerShots.filter(
@@ -290,8 +294,78 @@ function draw() {
 
     ctx.fillText(`${middleRightKey2PointersPercentage}%`, 245, 110)
 
-    //TODO: finish hot zone percentages for curved areas
-    //NOTE: can simply calculate the rest by passing the isThreePointer function and adding some x & y guard rails
+    //left wing curved 2 pointer area
+    const leftWing2PointerShots = shotsToDisplay.filter(
+      (shot) => !isThreePointer(shot.x, shot.y) && shot.x < 150 && shot.y > 50
+    )
+    const leftWing2PointersMade = leftWing2PointerShots.filter((shot) => shot.made).length
+    const leftWing2PointersAttempted = leftWing2PointerShots.length
+    const leftWing2PointersPercentage = (
+      (leftWing2PointersMade / leftWing2PointersAttempted) * 100 || 0
+    ).toFixed(0)
+
+    ctx.fillText(`${leftWing2PointersPercentage}%`, 80, 110)
+
+    //right wing curved 2 pointer area
+    const rightWing2PointerShots = shotsToDisplay.filter(
+      (shot) => !isThreePointer(shot.x, shot.y) && shot.x > 287 && shot.y > 50
+    )
+    const rightWing2PointersMade = rightWing2PointerShots.filter((shot) => shot.made).length
+    const rightWing2PointersAttempted = rightWing2PointerShots.length
+    const rightWing2PointersPercentage = (
+      (rightWing2PointersMade / rightWing2PointersAttempted) * 100 || 0
+    ).toFixed(0)
+
+    ctx.fillText(`${rightWing2PointersPercentage}%`, 340, 110)
+
+    //top key curved 2 pointer area
+    const topKey2PointerShots = shotsToDisplay.filter(
+      (shot) => !isThreePointer(shot.x, shot.y) && shot.x >= 150 && shot.x <= 287 && shot.y >= 166
+    )
+    const topKey2PointersMade = topKey2PointerShots.filter((shot) => shot.made).length
+    const topKey2PointersAttempted = topKey2PointerShots.length
+    const topKey2PointersPercentage = (
+      (topKey2PointersMade / topKey2PointersAttempted) * 100 || 0
+    ).toFixed(0)
+
+    ctx.fillText(`${topKey2PointersPercentage}%`, 210, 200)
+
+    //left 3 pointer area
+    const left3PointerShots = shotsToDisplay.filter(
+      (shot) =>
+        isThreePointer(shot.x, shot.y) && !isLeftCornerThreePointer(shot.x, shot.y) && shot.x < 150
+    )
+    const left3PointersMade = left3PointerShots.filter((shot) => shot.made).length
+    const left3PointersAttempted = left3PointerShots.length
+    const left3PointersPercentage = (
+      (left3PointersMade / left3PointersAttempted) * 100 || 0
+    ).toFixed(0)
+
+    ctx.fillText(`${left3PointersPercentage}%`, 60, 270)
+    //middle 3 pointer area
+    const middle3PointerShots = shotsToDisplay.filter(
+      (shot) => isThreePointer(shot.x, shot.y) && shot.x >= 150 && shot.x <= 287
+    )
+    const middle3PointersMade = middle3PointerShots.filter((shot) => shot.made).length
+    const middle3PointersAttempted = middle3PointerShots.length
+    const middle3PointersPercentage = (
+      (middle3PointersMade / middle3PointersAttempted) * 100 || 0
+    ).toFixed(0)
+
+    ctx.fillText(`${middle3PointersPercentage}%`, 210, 270)
+
+    //right 3 pointer area
+    const right3PointerShots = shotsToDisplay.filter(
+      (shot) =>
+        isThreePointer(shot.x, shot.y) && !isRightCornerThreePointer(shot.x, shot.y) && shot.x > 287
+    )
+    const right3PointersMade = right3PointerShots.filter((shot) => shot.made).length
+    const right3PointersAttempted = right3PointerShots.length
+    const right3PointersPercentage = (
+      (right3PointersMade / right3PointersAttempted) * 100 || 0
+    ).toFixed(0)
+
+    ctx.fillText(`${right3PointersPercentage}%`, 360, 270)
 
     ctx.beginPath()
     ctx.moveTo(219, 0)
@@ -310,15 +384,6 @@ function draw() {
     ctx.lineTo(287, 400)
     ctx.stroke()
     ctx.closePath()
-
-    ctx.fillText('X%', 80, 110)
-
-    ctx.fillText('X%', 340, 110)
-
-    ctx.fillText('X%', 60, 210)
-    ctx.fillText('X%', 360, 210)
-    ctx.fillText('X%', 210, 200)
-    ctx.fillText('X%', 210, 270)
   }
   window.requestAnimationFrame(draw)
 }
@@ -565,3 +630,4 @@ function drawTable(players: Player[]) {
 
 window.requestAnimationFrame(draw)
 registerEventListerners()
+
