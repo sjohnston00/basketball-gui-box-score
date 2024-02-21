@@ -363,9 +363,23 @@ function renderTeamsTable(teams: Team[]) {
     teamAbbvr.textContent = team.abbvr
     const teamPlayers = document.createElement('td')
     teamPlayers.textContent = team.players.length.toString()
+    const teamActionsTd = document.createElement('td')
+    const teamActionsEditButton = document.createElement('button')
+    teamActionsEditButton.textContent = 'Edit'
+    teamActionsEditButton.addEventListener('click', () => {
+      alert(`Edit team ${team.name}`)
+    })
+    const teamActionsDeleteButton = document.createElement('button')
+    teamActionsDeleteButton.textContent = 'Delete'
+    teamActionsDeleteButton.addEventListener('click', () => {
+      alert(`Delete team ${team.name}`)
+    })
+    teamActionsTd.appendChild(teamActionsEditButton)
+    teamActionsTd.appendChild(teamActionsDeleteButton)
     teamRow.appendChild(teamName)
     teamRow.appendChild(teamAbbvr)
     teamRow.appendChild(teamPlayers)
+    teamRow.appendChild(teamActionsTd)
     teamsTbody.appendChild(teamRow)
   }
 }
@@ -395,7 +409,6 @@ function renderPlayersTable(players: Player[]) {
     const playerDeleteButton = document.createElement('button')
     playerDeleteButton.textContent = 'Delete'
     playerDeleteButton.addEventListener('click', async () => {
-      //TODO: delete the player and rerender the table
       await deletePlayer(player.key)
       players = await getPlayers()
       renderPlayersTable(players)
