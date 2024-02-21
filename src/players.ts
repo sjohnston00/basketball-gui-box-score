@@ -29,3 +29,8 @@ export async function createPlayer(newPlayer: Omit<Player, 'key' | 'createdAt'>)
   const playerId = generatePlayer_uuid()
   await playersTable.setItem(playerId, player)
 }
+
+export async function deletePlayer(id: string) {
+  await playersTable.removeItem(id)
+}
+

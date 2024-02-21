@@ -1,10 +1,11 @@
 import { faker } from '@faker-js/faker'
 import { createTeam, getTeams } from './src/teams'
 import { Team } from './src/types/team'
-import { createPlayer, getPlayers } from './src/players'
+import { createPlayer, deletePlayer, getPlayers } from './src/players'
 import { initialiseCanvas } from './src/drawCourt'
 import './src/drawCourt'
 import { Player } from './src/types/player'
+import './src/elem'
 
 //TODO: Calculate random x & y coordinates for each shot for a player and calculate box score based on these shots
 async function main() {
@@ -370,7 +371,7 @@ function renderTeamsTable(teams: Team[]) {
 }
 
 function renderPlayersTable(players: Player[]) {
-  const playersTbody = document.getElementById('players-table-tbody') as HTMLTableElement
+  const playersTbody = document.getElementById('players-table-tbody') as HTMLTableSectionElement
 
   while (playersTbody.firstChild) {
     playersTbody.removeChild(playersTbody.firstChild)
@@ -382,8 +383,30 @@ function renderPlayersTable(players: Player[]) {
     playerName.textContent = player.name
     const playerNumber = document.createElement('td')
     playerNumber.textContent = player.number.toString()
+
+    const playerActionsTd = document.createElement('td')
+    const playerEditButton = document.createElement('button')
+    playerEditButton.classList.add('btn', 'btn-primary')
+    playerEditButton.textContent = 'Edit'
+    playerEditButton.addEventListener('click', () => {
+      //TODO: pull up a dialog for editing the player with some fields
+      console.log(`editPlayer(player=${player.name})`)
+    })
+    const playerDeleteButton = document.createElement('button')
+    playerDeleteButton.textContent = 'Delete'
+    playerDeleteButton.addEventListener('click', async () => {
+      //TODO: delete the player and rerender the table
+      await deletePlayer(player.key)
+      players = await getPlayers()
+      renderPlayersTable(players)
+      // console.log(`deletePlayer(player=${player.name})`)
+    })
+    playerActionsTd.appendChild(playerEditButton)
+    playerActionsTd.appendChild(playerDeleteButton)
+
     playerRow.appendChild(playerName)
     playerRow.appendChild(playerNumber)
+    playerRow.appendChild(playerActionsTd)
     playersTbody.appendChild(playerRow)
   }
 }
