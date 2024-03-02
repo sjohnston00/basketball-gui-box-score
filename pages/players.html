@@ -15,41 +15,20 @@
     </nav>
     <h1>Basketball tracker</h1>
     <h2>Players</h2>
-    <div class="flex justify-between">
-      <div>
-        <h2>New Player</h2>
-        <form id="add-player-form">
-          <label for="player-name-input">Name</label>
-          <input type="text" name="player-name-input" id="player-name-input" required />
-          <label for="player-number-input">Player number</label>
-          <input
-            type="number"
-            name="player-number-input"
-            id="player-number-input"
-            min="0"
-            max="99"
-            required
-          />
-          <select name="player-team-id" id="player-team-id">
-            <option value="">Select a team</option>
-          </select>
-          <button id="add-player-button">Add</button>
-        </form>
-      </div>
-      <div>
-        <h2>Players</h2>
-        <table id="players-table">
-          <thead>
-            <tr>
-              <th>#</th>
-              <th>Name</th>
-              <th></th>
-            </tr>
-          </thead>
-          <tbody id="players-table-tbody"></tbody>
-        </table>
-      </div>
-    </div>
+    <a href="/pages/new-player.html" class="p-2 bg-indigo-400 rounded text-white my-4 inline-block"
+      >New Player</a
+    >
+    <table id="players-table" class="w-full">
+      <thead>
+        <tr>
+          <th>#</th>
+          <th>Name</th>
+          <th></th>
+        </tr>
+      </thead>
+      <tbody id="players-table-tbody"></tbody>
+    </table>
+    <script type="module" src="/scripts/players-page.js"></script>
   </body>
 </html>
 

@@ -1,17 +1,14 @@
 import { faker } from '@faker-js/faker'
-import { createTeam, getTeams } from './src/teams'
-import { Team } from './src/types/team'
-import { createPlayer, deletePlayer, getPlayers } from './src/players'
-import { initialiseCanvas } from './src/drawCourt'
-import './src/drawCourt'
-import { Player } from './src/types/player'
-import './src/elem'
+import { getTeams } from './teams'
+import { getPlayers } from './players'
+import { initialiseCanvas } from './drawCourt'
+import './drawCourt'
+import './elem'
 
 //TODO: Calculate random x & y coordinates for each shot for a player and calculate box score based on these shots
 async function main() {
   let teams = await getTeams()
   let players = await getPlayers()
-  renderPlayersTable(players)
 
   for (let index = 0; index < players.length; index++) {
     const p = players[index]
@@ -32,7 +29,6 @@ async function main() {
       `${p.name}: 2pt ${(twoPointPercentage * 100).toFixed(0)}%, 3pt ${(threePointPercentage * 100).toFixed(0)}%`
     )
   }
-  renderTeamsSelectOptions(teams)
   initialiseCanvas()
 
   const game_data = {
@@ -46,37 +42,6 @@ async function main() {
 
   const team1FinalScoreSpan = document.getElementById('team-1-final-score')
   const team2FinalScoreSpan = document.getElementById('team-2-final-score')
-  const addPlayerForm = document.getElementById('add-player-form') as HTMLFormElement
-  addPlayerForm.onsubmit = async (event) => {
-    event.preventDefault()
-    const playerNameInput = document.getElementById('player-name-input') as HTMLInputElement
-    const playerNumberInput = document.getElementById('player-number-input') as HTMLInputElement
-
-    const newPlayerTeamSelect = document.getElementById('player-team-id') as HTMLSelectElement
-
-    const playerName = playerNameInput.value
-    const playerNumber = playerNumberInput.value
-    const playerTeamId = newPlayerTeamSelect.value
-
-    const player = {
-      name: playerName,
-      number: playerNumber,
-      teamId: playerTeamId,
-    }
-
-    await createPlayer(player).catch((e) => {
-      const ERR_MSG = 'Error creating player'
-      console.error(`${ERR_MSG}: `, e)
-      alert(ERR_MSG)
-    })
-
-    teams = await getTeams()
-    players = await getPlayers()
-    renderPlayersTable(players)
-
-    addPlayerForm.reset()
-    playerNameInput.focus()
-  }
 
   generateRandomBoxScore(game_data)
 
@@ -317,61 +282,6 @@ function randomUniqueNumber(currentNums: number[], maxNumber = 99) {
     randomNumber = faker.number.int(maxNumber)
   }
   return randomNumber
-}
-
-function renderPlayersTable(players: Player[]) {
-  const playersTbody = document.getElementById('players-table-tbody') as HTMLTableSectionElement
-
-  while (playersTbody.firstChild) {
-    playersTbody.removeChild(playersTbody.firstChild)
-  }
-  for (let index = 0; index < players.length; index++) {
-    const player = players[index]
-    const playerRow = document.createElement('tr')
-    const playerName = document.createElement('td')
-    playerName.textContent = player.name
-    const playerNumber = document.createElement('td')
-    playerNumber.textContent = player.number.toString()
-
-    const playerActionsTd = document.createElement('td')
-    const playerEditButton = document.createElement('button')
-    playerEditButton.classList.add('btn', 'btn-primary')
-    playerEditButton.textContent = 'Edit'
-    playerEditButton.addEventListener('click', () => {
-      //TODO: pull up a dialog for editing the player with some fields
-      console.log(`editPlayer(player=${player.name})`)
-    })
-    const playerDeleteButton = document.createElement('button')
-    playerDeleteButton.textContent = 'Delete'
-    playerDeleteButton.addEventListener('click', async () => {
-      await deletePlayer(player.key)
-      players = await getPlayers()
-      renderPlayersTable(players)
-      // console.log(`deletePlayer(player=${player.name})`)
-    })
-    playerActionsTd.appendChild(playerEditButton)
-    playerActionsTd.appendChild(playerDeleteButton)
-
-    playerRow.appendChild(playerName)
-    playerRow.appendChild(playerNumber)
-    playerRow.appendChild(playerActionsTd)
-    playersTbody.appendChild(playerRow)
-  }
-}
-
-function renderTeamsSelectOptions(teams: Team[]) {
-  const newPlayerTeamSelect = document.getElementById('player-team-id') as HTMLSelectElement
-
-  while (newPlayerTeamSelect.firstChild) {
-    newPlayerTeamSelect.removeChild(newPlayerTeamSelect.firstChild)
-  }
-  for (let index = 0; index < teams.length; index++) {
-    const team = teams[index]
-    const option = document.createElement('option')
-    option.value = team.key
-    option.textContent = team.name
-    newPlayerTeamSelect.appendChild(option)
-  }
 }
 
 main()
