@@ -1,0 +1,37 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <link rel="stylesheet" href="/styles.css" />
+    <title>Basketball tracker</title>
+  </head>
+  <body class="max-w-7xl mx-auto px-4">
+    <nav class="flex items-center justify-start mt-4 gap-4 [&>a]:p-2">
+      <a href="/pages/index.html">Home</a>
+      <a href="/pages/teams.html">Teams</a>
+      <a href="/pages/players.html">Players</a>
+      <a href="/pages/games.html">Games</a>
+    </nav>
+    <h1>Basketball tracker</h1>
+    <h2>Teams</h2>
+    <a href="/pages/new-team.html" class="p-2 bg-indigo-400 rounded text-white my-4 inline-block"
+      >New Team</a
+    >
+
+    <h2>Teams</h2>
+    <table id="teams-table" class="w-full">
+      <thead>
+        <tr>
+          <th>Name</th>
+          <th>Abbreviation</th>
+          <th>Players</th>
+          <th></th>
+        </tr>
+      </thead>
+      <tbody id="teams-table-tbody"></tbody>
+    </table>
+  </body>
+  <script type="module" src="/scripts/teams-page.js"></script>
+</html>
+

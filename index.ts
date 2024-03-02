@@ -11,7 +11,6 @@ import './src/elem'
 async function main() {
   let teams = await getTeams()
   let players = await getPlayers()
-  renderTeamsTable(teams)
   renderPlayersTable(players)
 
   for (let index = 0; index < players.length; index++) {
@@ -48,8 +47,6 @@ async function main() {
   const team1FinalScoreSpan = document.getElementById('team-1-final-score')
   const team2FinalScoreSpan = document.getElementById('team-2-final-score')
   const addPlayerForm = document.getElementById('add-player-form') as HTMLFormElement
-  const addTeamForm = document.getElementById('new-team-form') as HTMLFormElement
-
   addPlayerForm.onsubmit = async (event) => {
     event.preventDefault()
     const playerNameInput = document.getElementById('player-name-input') as HTMLInputElement
@@ -75,48 +72,10 @@ async function main() {
 
     teams = await getTeams()
     players = await getPlayers()
-    renderTeamsTable(teams)
     renderPlayersTable(players)
 
     addPlayerForm.reset()
     playerNameInput.focus()
-  }
-
-  addTeamForm.onsubmit = async (event) => {
-    event.preventDefault()
-
-    const teamNameInput = document.getElementById('team-name-input') as HTMLInputElement
-    const teamAbbvrInput = document.getElementById('team-name-abbvr-input') as HTMLInputElement
-
-    const teamName = teamNameInput.value
-    const teamAbbvr = teamAbbvrInput.value
-
-    //check team name already exists
-    let teamNameExists = teams.some((team) => team.name === teamName)
-    if (teamNameExists) {
-      alert('Team name already exists')
-      teamNameInput.focus()
-      return
-    }
-
-    const newTeam = {
-      name: teamName,
-      abbvr: teamAbbvr,
-    }
-
-    await createTeam(newTeam).catch((e) => {
-      const ERR_MSG = 'Error creating team'
-      console.error(`${ERR_MSG}: `, e)
-      alert(ERR_MSG)
-    })
-
-    teams = await getTeams()
-
-    renderTeamsTable(teams)
-    renderTeamsSelectOptions(teams)
-
-    addTeamForm.reset()
-    teamNameInput.focus()
   }
 
   generateRandomBoxScore(game_data)
@@ -140,11 +99,26 @@ function generateRandomBoxScore(game_data: any) {
     const team1Player: Record<string, any> = {}
     const team2Player: Record<string, any> = {}
 
+    const fieldGoals = faker.number.int(24)
+
+    let playerShots: { x: number; y: number; made: boolean }[] = []
+    for (let index = 0; index < fieldGoals; index++) {
+      const shotX = faker.number.int({ min: 1, max: 437 })
+      const shotY = faker.number.int({ min: 1, max: 399 })
+      const percentage = faker.number.float({ min: 0, max: 1, fractionDigits: 2 })
+      const madePercentage = faker.datatype.boolean({ probability: percentage })
+
+      playerShots.push({ x: shotX, y: shotY, made: madePercentage })
+    }
+
+    team1Player.name = faker.person.fullName()
+    console.log(`Player: ${team1Player.name}`)
+    console.table(playerShots)
+
     team1Player.number = randomUniqueNumber(
       game_data.team1.players.map((p) => p.number),
       30
     )
-    team1Player.name = faker.person.fullName()
     team1Player.points = randomWeightedNumber(25)
     team1Player.assists = faker.number.int(5)
     team1Player.rebounds = faker.number.int(10)
@@ -332,10 +306,7 @@ function generateRandomBoxScore(game_data: any) {
   team2PlayerTbody.appendChild(team2Footertr)
 }
 
-function randomWeightedNumber(maxNumber = 50) {
-  // Adjust the exponent to control the distribution
-  const exponent = 2
-
+function randomWeightedNumber(maxNumber = 50, exponent = 2) {
   // Calculate the weighted random number
   return Math.floor(Math.pow(Math.random(), exponent) * maxNumber) + 1
 }
@@ -346,42 +317,6 @@ function randomUniqueNumber(currentNums: number[], maxNumber = 99) {
     randomNumber = faker.number.int(maxNumber)
   }
   return randomNumber
-}
-
-function renderTeamsTable(teams: Team[]) {
-  const teamsTbody = document.getElementById('teams-table-tbody') as HTMLTableElement
-
-  while (teamsTbody.firstChild) {
-    teamsTbody.removeChild(teamsTbody.firstChild)
-  }
-  for (let index = 0; index < teams.length; index++) {
-    const team = teams[index]
-    const teamRow = document.createElement('tr')
-    const teamName = document.createElement('td')
-    teamName.textContent = team.name
-    const teamAbbvr = document.createElement('td')
-    teamAbbvr.textContent = team.abbvr
-    const teamPlayers = document.createElement('td')
-    teamPlayers.textContent = team.players.length.toString()
-    const teamActionsTd = document.createElement('td')
-    const teamActionsEditButton = document.createElement('button')
-    teamActionsEditButton.textContent = 'Edit'
-    teamActionsEditButton.addEventListener('click', () => {
-      alert(`Edit team ${team.name}`)
-    })
-    const teamActionsDeleteButton = document.createElement('button')
-    teamActionsDeleteButton.textContent = 'Delete'
-    teamActionsDeleteButton.addEventListener('click', () => {
-      alert(`Delete team ${team.name}`)
-    })
-    teamActionsTd.appendChild(teamActionsEditButton)
-    teamActionsTd.appendChild(teamActionsDeleteButton)
-    teamRow.appendChild(teamName)
-    teamRow.appendChild(teamAbbvr)
-    teamRow.appendChild(teamPlayers)
-    teamRow.appendChild(teamActionsTd)
-    teamsTbody.appendChild(teamRow)
-  }
 }
 
 function renderPlayersTable(players: Player[]) {

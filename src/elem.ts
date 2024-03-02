@@ -25,7 +25,3 @@ export class Elem {
   }
 }
 
-const elem = new Elem('div')
-elem.name = 'Hello world'
-elem.appendTo(document.body)
-

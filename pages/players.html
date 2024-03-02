@@ -1,0 +1,55 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <link rel="stylesheet" href="/styles.css" />
+    <title>Basketball tracker</title>
+  </head>
+  <body class="max-w-7xl mx-auto px-4">
+    <nav class="flex items-center justify-start mt-4 gap-4 [&>a]:p-2">
+      <a href="/pages/index.html">Home</a>
+      <a href="/pages/teams.html">Teams</a>
+      <a href="/pages/players.html">Players</a>
+      <a href="/pages/games.html">Games</a>
+    </nav>
+    <h1>Basketball tracker</h1>
+    <h2>Players</h2>
+    <div class="flex justify-between">
+      <div>
+        <h2>New Player</h2>
+        <form id="add-player-form">
+          <label for="player-name-input">Name</label>
+          <input type="text" name="player-name-input" id="player-name-input" required />
+          <label for="player-number-input">Player number</label>
+          <input
+            type="number"
+            name="player-number-input"
+            id="player-number-input"
+            min="0"
+            max="99"
+            required
+          />
+          <select name="player-team-id" id="player-team-id">
+            <option value="">Select a team</option>
+          </select>
+          <button id="add-player-button">Add</button>
+        </form>
+      </div>
+      <div>
+        <h2>Players</h2>
+        <table id="players-table">
+          <thead>
+            <tr>
+              <th>#</th>
+              <th>Name</th>
+              <th></th>
+            </tr>
+          </thead>
+          <tbody id="players-table-tbody"></tbody>
+        </table>
+      </div>
+    </div>
+  </body>
+</html>
+

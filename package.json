@@ -9,7 +9,7 @@
     "build": "run-s build:*",
     "dev:css": "tailwindcss -i ./tailwind.css -o ./styles.css --watch",
     "build:css": "tailwindcss -i ./tailwind.css -o ./styles.css",
-    "dev:js": "esbuild index.ts --bundle --target=es2020 --watch --sourcemap --outfile=index.js",
+    "dev:js": "esbuild src/*.ts --bundle --target=es2020 --watch --sourcemap --outdir=scripts --servedir=.",
     "build:js": "esbuild index.ts --bundle --minify --target=es2020 --outfile=index.js",
     "format": "prettier . --write"
   },
@@ -28,3 +28,4 @@
     "localforage": "^1.10.0"
   }
 }
+
