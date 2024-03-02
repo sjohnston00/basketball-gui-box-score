@@ -1,5 +1,5 @@
 import { teamsTable } from './indexeddb'
-import { getTeams } from './teams'
+import { getTeamById, getTeams } from './teams'
 
 async function main() {
   //get the teamId query param
@@ -11,7 +11,7 @@ async function main() {
   }
 
   //ensure team exists in db
-  const team = await teamsTable.getItem(teamId)
+  const team = await getTeamById(teamId)
   if (!team) {
     alert('Team does not exist')
     return

@@ -41,3 +41,17 @@ export async function createTeam(newTeam: NewTeam) {
   const teamId = generateTeam_uuid()
   await teamsTable.setItem(teamId, team)
 }
+
+export async function getTeamById(teamId: string): Promise<Team | undefined> {
+  const team = (await teamsTable.getItem(teamId)) as Record<string, any> | undefined
+  if (!team) return undefined
+
+  return {
+    key: teamId,
+    name: team.name,
+    abbvr: team.abbvr,
+    players: [],
+    createdAt: team.createdAt,
+  }
+}
+
