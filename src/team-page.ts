@@ -9,7 +9,7 @@ async function main() {
     return
   }
 
-  //TODO: ensure team exists in db
+  //ensure team exists in db
   const team = await teamsTable.getItem(teamId)
   if (!team) {
     alert('Team does not exist')

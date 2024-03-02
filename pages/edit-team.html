@@ -15,18 +15,18 @@
     </nav>
     <h1>Basketball tracker</h1>
     <h2>Teams</h2>
-    <h3>Edit Team</h3>
+    <h1>Edit Team - <span id="team-name"></span></h1>
     <a href="/pages/teams.html" class="p-2 bg-neutral-800 rounded text-white my-4 inline-block"
       >Back</a
     >
-    <form id="new-team-form" class="mb-8">
+    <form id="edit-team-form" class="mb-8">
       <label for="team-name-input">Name</label>
       <input type="text" name="team-name-input" id="team-name-input" required />
       <label for="team-name-abbvr-input">Abbreviation</label>
       <input type="text" name="team-name-abbvr-input" id="team-name-abbvr-input" required />
-      <button id="add-team-button">Add Team</button>
+      <button id="edit-team-button">Save</button>
     </form>
   </body>
-  <script type="module" src="/scripts/new-teams-page.js"></script>
+  <script type="module" src="/scripts/edit-team-page.js"></script>
 </html>
 
