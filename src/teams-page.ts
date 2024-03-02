@@ -1,3 +1,4 @@
+import { teamsTable } from './indexeddb'
 import { getTeams } from './teams'
 import { Team } from './types/team'
 
@@ -29,10 +30,13 @@ function renderTeamsTable(teams: Team[]) {
     })
     const teamActionsDeleteButton = document.createElement('button')
     teamActionsDeleteButton.textContent = 'Delete'
-    teamActionsDeleteButton.addEventListener('click', () => {
+    teamActionsDeleteButton.addEventListener('click', async () => {
       const confirmDelete = confirm(`Are you sure you want to delete team ${team.name}?`)
       if (!confirmDelete) return
-      alert(`TODO: Delete team ${team.name}`)
+
+      await teamsTable.removeItem(team.key)
+      teams = await getTeams()
+      renderTeamsTable(teams)
     })
     teamActionsTd.appendChild(teamActionsViewButton)
     teamActionsTd.appendChild(teamActionsEditButton)
