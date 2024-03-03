@@ -1,15 +1,17 @@
+import { pl } from '@faker-js/faker'
 import { deletePlayer, getPlayers } from './players'
 import { getTeams } from './teams'
 import { Player } from './types/player'
+import { Team } from './types/team'
 
 async function main() {
   let teams = await getTeams()
   let players = await getPlayers()
 
-  renderPlayersTable(players)
+  renderPlayersTable(players, teams)
 }
 
-function renderPlayersTable(players: Player[]) {
+function renderPlayersTable(players: Player[], teams: Team[]) {
   const playersTbody = document.getElementById('players-table-tbody') as HTMLTableSectionElement
 
   while (playersTbody.firstChild) {
@@ -22,6 +24,15 @@ function renderPlayersTable(players: Player[]) {
     playerName.textContent = player.name
     const playerNumber = document.createElement('td')
     playerNumber.textContent = player.number.toString()
+
+    const playerTeamTd = document.createElement('td')
+    const playerTeamLink = document.createElement('a')
+    const playerTeam = teams.find((team) => team.key === player.teamId)
+
+    playerTeamLink.classList.add('underline')
+    playerTeamLink.textContent = playerTeam ? playerTeam.name : 'No Team'
+    playerTeamLink.href = playerTeam ? `/pages/team.html?teamId=${player.teamId}` : '#'
+    playerTeamTd.appendChild(playerTeamLink)
 
     const playerActionsTd = document.createElement('td')
     const playerEditButton = document.createElement('button')
@@ -37,7 +48,7 @@ function renderPlayersTable(players: Player[]) {
       if (!confirmDelete) return
       await deletePlayer(player.key)
       players = await getPlayers()
-      renderPlayersTable(players)
+      renderPlayersTable(players, teams)
       // console.log(`deletePlayer(player=${player.name})`)
     })
     playerActionsTd.appendChild(playerEditButton)
@@ -45,6 +56,7 @@ function renderPlayersTable(players: Player[]) {
 
     playerRow.appendChild(playerName)
     playerRow.appendChild(playerNumber)
+    playerRow.appendChild(playerTeamTd)
     playerRow.appendChild(playerActionsTd)
     playersTbody.appendChild(playerRow)
   }
