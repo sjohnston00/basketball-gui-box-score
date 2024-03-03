@@ -47,3 +47,16 @@ export async function getPlayerById(playerId: string): Promise<Player | undefine
   }
 }
 
+export async function getPlayersForTeam(teamId: string, players?: Player[]): Promise<Player[]> {
+  players = players || (await getPlayers())
+  let teamPlayers: Player[] = []
+
+  for (let index = 0; index < players.length; index++) {
+    const player = players[index]
+    if (player.teamId === teamId) {
+      teamPlayers.push(player)
+    }
+  }
+  return teamPlayers
+}
+

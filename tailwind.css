@@ -31,3 +31,8 @@ label {
 tbody tr:nth-child(odd) {
   @apply bg-gray-300;
 }
+
+a {
+  @apply underline;
+}
+

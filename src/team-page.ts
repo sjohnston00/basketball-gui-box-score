@@ -1,4 +1,5 @@
-import { teamsTable } from './indexeddb'
+import { playersTable, teamsTable } from './indexeddb'
+import { getTeamById } from './teams'
 
 async function main() {
   //get the teamId query param
@@ -10,7 +11,7 @@ async function main() {
   }
 
   //ensure team exists in db
-  const team = await teamsTable.getItem(teamId)
+  const team = await getTeamById(teamId)
   if (!team) {
     alert('Team does not exist')
     return
@@ -24,6 +25,21 @@ async function main() {
 
   const teamNameHeading = document.getElementById('team-name') as HTMLHeadingElement
   teamNameHeading.textContent = team.name
+
+  const teamPlayerTbody = document.getElementById('team-players-tbody') as HTMLTableSectionElement
+
+  for (let index = 0; index < team.players.length; index++) {
+    const teamPlayer = team.players[index]
+    const teamPlayerRow = document.createElement('tr')
+    const teamPlayerName = document.createElement('td')
+    teamPlayerName.textContent = teamPlayer.name
+    const teamPlayerNumber = document.createElement('td')
+    teamPlayerNumber.textContent = teamPlayer.number.toString()
+
+    teamPlayerRow.appendChild(teamPlayerName)
+    teamPlayerRow.appendChild(teamPlayerNumber)
+    teamPlayerTbody.appendChild(teamPlayerRow)
+  }
 }
 
 main()

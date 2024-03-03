@@ -12,7 +12,11 @@ function renderTeamsTable(teams: Team[]) {
     const team = teams[index]
     const teamRow = document.createElement('tr')
     const teamName = document.createElement('td')
-    teamName.textContent = team.name
+    const teamNameLink = document.createElement('a')
+    teamNameLink.href = `/pages/team.html?teamId=${team.key}`
+    teamNameLink.textContent = team.name
+    teamName.appendChild(teamNameLink)
+
     const teamAbbvr = document.createElement('td')
     teamAbbvr.textContent = team.abbvr
     const teamPlayers = document.createElement('td')

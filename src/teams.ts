@@ -1,5 +1,5 @@
 import { teamsTable } from './indexeddb'
-import { getPlayers } from './players'
+import { getPlayers, getPlayersForTeam } from './players'
 import type { NewTeam, Team } from './types/team'
 import { generateTeam_uuid, uuid } from './uuid'
 
@@ -17,16 +17,8 @@ export async function getTeams() {
   })
 
   const players = await getPlayers()
-  for (let index = 0; index < players.length; index++) {
-    const player = players[index]
-
-    for (let j = 0; j < teams.length; j++) {
-      const team = teams[j]
-      if (player.teamId === team.key) {
-        teams[j].players.push(player)
-        break
-      }
-    }
+  for (let i = 0; i < teams.length; i++) {
+    teams[i].players = await getPlayersForTeam(teams[i].key, players)
   }
   return teams
 }
@@ -46,11 +38,13 @@ export async function getTeamById(teamId: string): Promise<Team | undefined> {
   const team = (await teamsTable.getItem(teamId)) as Record<string, any> | undefined
   if (!team) return undefined
 
+  const players = await getPlayersForTeam(teamId)
+
   return {
     key: teamId,
     name: team.name,
     abbvr: team.abbvr,
-    players: [],
+    players: players,
     createdAt: team.createdAt,
   }
 }
