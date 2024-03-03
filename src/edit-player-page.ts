@@ -1,3 +1,4 @@
+import { playersTable } from './indexeddb'
 import { createPlayer, getPlayerById, getPlayers } from './players'
 import { getTeams } from './teams'
 import { Team } from './types/team'
@@ -40,19 +41,12 @@ async function main() {
     const playerNumber = playerNumberInput.value
     const playerTeamId = editPlayerTeamSelect.value
 
-    const player = {
+    await playersTable.setItem(playerId, {
       name: playerName,
       number: playerNumber,
       teamId: playerTeamId,
-    }
-
-    alert('EDIT PLAYER')
-
-    // await createPlayer(player).catch((e) => {
-    //   const ERR_MSG = 'Error creating player'
-    //   console.error(`${ERR_MSG}: `, e)
-    //   alert(ERR_MSG)
-    // })
+      createdAt: player.createdAt,
+    })
 
     window.location.replace('/pages/players.html')
   }
