@@ -1,0 +1,42 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <link rel="stylesheet" href="/styles.css" />
+    <title>Basketball tracker</title>
+  </head>
+  <body class="max-w-7xl mx-auto px-4">
+    <nav class="flex items-center justify-start mt-4 gap-4 [&>a]:p-2">
+      <a href="/pages/index.html">Home</a>
+      <a href="/pages/teams.html">Teams</a>
+      <a href="/pages/players.html">Players</a>
+      <a href="/pages/games.html">Games</a>
+    </nav>
+    <h1>Basketball tracker</h1>
+    <h2>Players</h2>
+    <h3>Edit Player</h3>
+    <a href="/pages/players.html" class="p-2 bg-neutral-800 rounded text-white my-4 inline-block"
+      >Back</a
+    >
+    <form id="edit-player-form">
+      <label for="player-name-input">Name</label>
+      <input type="text" name="player-name-input" id="player-name-input" required />
+      <label for="player-number-input">Player number</label>
+      <input
+        type="number"
+        name="player-number-input"
+        id="player-number-input"
+        min="0"
+        max="99"
+        required
+      />
+      <select name="player-team-id" id="player-team-id">
+        <option value="">Select a team</option>
+      </select>
+      <button id="save-player-button">Save</button>
+    </form>
+    <script type="module" src="/scripts/edit-player-page.js"></script>
+  </body>
+</html>
+
