@@ -8,3 +8,6 @@ export function generateTeam_uuid() {
 export function generatePlayer_uuid() {
   return `player${uuid()}`
 }
+export function generateGame_uuid() {
+  return `game${uuid()}`
+}
