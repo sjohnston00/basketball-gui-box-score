@@ -15,3 +15,12 @@ export const playersTable = localforage.createInstance({
   storeName: 'players',
   version: 1,
 })
+
+export const gamesTable = localforage.createInstance({
+  description: 'basketball-tracker-db',
+  driver: localforage.INDEXEDDB,
+  name: 'basketball-tracker-db',
+  storeName: 'games',
+  version: 1,
+})
+

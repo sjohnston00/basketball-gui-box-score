@@ -1,4 +1,6 @@
-import { getTeams } from './teams'
+import { gamesTable } from './indexeddb'
+import { getTeamById, getTeams } from './teams'
+import { generateGame_uuid } from './uuid'
 
 async function main() {
   let teams = await getTeams()
@@ -26,7 +28,17 @@ async function main() {
       return
     }
 
-    alert('Play on')
+    const gameId = generateGame_uuid()
+    await gamesTable.setItem(gameId, {
+      homeTeamId: team1Key,
+      awayTeamId: team2Key,
+      homeTeamShots: [],
+      awayTeamShots: [],
+      createdAt: new Date(),
+      finished: false,
+    })
+
+    window.location.replace(`/pages/game.html?gameId=${gameId}`)
   }
 }
 

@@ -1,6 +1,7 @@
-import { generateGame_uuid } from './uuid'
+import { deleteGame, getGames } from './games'
+import { PopulatedGame } from './types/game'
 
-function renderGamesTable(games: any[]) {
+function renderGamesTable(games: PopulatedGame[]) {
   const gamesTbody = document.getElementById('games-table-tbody') as HTMLTableElement
 
   while (gamesTbody.firstChild) {
@@ -12,7 +13,7 @@ function renderGamesTable(games: any[]) {
     const gameHomeTeam = document.createElement('td')
     const gameHomeTeamLink = document.createElement('a')
     // gameHomeTeamLink.href = `/pages/team.html?teamId=${game.homeTeam.key}`
-    gameHomeTeamLink.textContent = 'Home Team'
+    gameHomeTeamLink.textContent = game.homeTeam.name
     gameHomeTeam.appendChild(gameHomeTeamLink)
 
     const gameHomeTeamScore = document.createElement('td')
@@ -21,7 +22,7 @@ function renderGamesTable(games: any[]) {
     const gameAwayTeam = document.createElement('td')
     const gameAwayTeamLink = document.createElement('a')
     // gameLink.href = `/pages/team.html?teamId=${game.awayTeam.key}`
-    gameAwayTeamLink.textContent = 'Away Team'
+    gameAwayTeamLink.textContent = game.awayTeam.name
     gameAwayTeam.appendChild(gameAwayTeamLink)
 
     const gameAwayTeamScore = document.createElement('td')
@@ -37,6 +38,9 @@ function renderGamesTable(games: any[]) {
       const confirmDelete = confirm(`Are you sure you want to delete this game?`)
       if (!confirmDelete) return
 
+      await deleteGame(game.key)
+      games = await getGames()
+      renderGamesTable(games)
       // await teamsTable.removeItem(game.key)
       // games = await getTeams()
       // renderGamesTable(games)
@@ -54,13 +58,9 @@ function renderGamesTable(games: any[]) {
 }
 
 async function main() {
-  //TODO: create an indexeddb games table
-  // let teams = await getTeams()
-  renderGamesTable([
-    { key: generateGame_uuid() },
-    { key: generateGame_uuid() },
-    { key: generateGame_uuid() },
-  ])
+  let games = await getGames()
+  renderGamesTable(games)
 }
 
 main()
+
