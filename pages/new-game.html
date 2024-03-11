@@ -1,0 +1,36 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <link rel="stylesheet" href="/styles.css" />
+    <title>Basketball tracker</title>
+  </head>
+  <body class="max-w-7xl mx-auto px-4">
+    <nav class="flex items-center justify-start mt-4 gap-4 [&>a]:p-2">
+      <a href="/pages/index.html">Home</a>
+      <a href="/pages/teams.html">Teams</a>
+      <a href="/pages/players.html">Players</a>
+      <a href="/pages/games.html">Games</a>
+    </nav>
+    <h1>Basketball tracker</h1>
+    <h2>Teams</h2>
+    <h3>New Game</h3>
+    <a href="/pages/teams.html" class="p-2 bg-neutral-800 rounded text-white my-4 inline-block"
+      >Back</a
+    >
+    <form id="new-game-form" class="mb-8">
+      <label for="team1">Team 1</label>
+      <select name="team1" id="team1-select" required>
+        <option value="">Please select an option</option>
+      </select>
+      <label for="team2">Team 2</label>
+      <select name="team2" id="team2-select" required>
+        <option value="">Please select an option</option>
+      </select>
+      <button id="start-game-button">Start</button>
+    </form>
+  </body>
+  <script type="module" src="/scripts/new-game-page.js"></script>
+</html>
+
