@@ -12,7 +12,7 @@ function renderGamesTable(games: PopulatedGame[]) {
     const gameRow = document.createElement('tr')
     const gameHomeTeam = document.createElement('td')
     const gameHomeTeamLink = document.createElement('a')
-    // gameHomeTeamLink.href = `/pages/team.html?teamId=${game.homeTeam.key}`
+    gameHomeTeamLink.href = `/pages/team.html?teamId=${game.homeTeam.key}`
     gameHomeTeamLink.textContent = game.homeTeam.name
     gameHomeTeam.appendChild(gameHomeTeamLink)
 
@@ -21,7 +21,7 @@ function renderGamesTable(games: PopulatedGame[]) {
 
     const gameAwayTeam = document.createElement('td')
     const gameAwayTeamLink = document.createElement('a')
-    // gameLink.href = `/pages/team.html?teamId=${game.awayTeam.key}`
+    gameAwayTeamLink.href = `/pages/team.html?teamId=${game.awayTeam.key}`
     gameAwayTeamLink.textContent = game.awayTeam.name
     gameAwayTeam.appendChild(gameAwayTeamLink)
 
@@ -29,6 +29,9 @@ function renderGamesTable(games: PopulatedGame[]) {
     gameAwayTeamScore.textContent = '0'
 
     const gameActionsTd = document.createElement('td')
+    const gameActionsViewLink = document.createElement('a')
+    gameActionsViewLink.href = `/pages/game.html?gameId=${game.key}`
+    gameActionsViewLink.textContent = 'View'
     const gameActionsEditLink = document.createElement('a')
     gameActionsEditLink.href = `/pages/edit-game.html?gameId=${game.key}`
     gameActionsEditLink.textContent = 'Edit'
@@ -45,6 +48,7 @@ function renderGamesTable(games: PopulatedGame[]) {
       // games = await getTeams()
       // renderGamesTable(games)
     })
+    gameActionsTd.appendChild(gameActionsViewLink)
     gameActionsTd.appendChild(gameActionsEditLink)
     gameActionsTd.appendChild(gameActionsDeleteButton)
 

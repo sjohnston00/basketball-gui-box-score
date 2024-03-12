@@ -15,22 +15,16 @@
     </nav>
     <h1>Basketball tracker</h1>
     <h2>Games</h2>
-    <h3>New Game</h3>
-    <a href="/pages/teams.html" class="p-2 bg-neutral-800 rounded text-white my-4 inline-block"
+    <h3>View Game</h3>
+    <a href="/pages/games.html" class="p-2 bg-neutral-800 rounded text-white my-4 inline-block"
       >Back</a
     >
-    <form id="new-game-form" class="mb-8">
-      <label for="team1">Team 1</label>
-      <select name="team1" id="team1-select" required>
-        <option value="">Please select an option</option>
-      </select>
-      <label for="team2">Team 2</label>
-      <select name="team2" id="team2-select" required>
-        <option value="">Please select an option</option>
-      </select>
-      <button id="start-game-button">Start</button>
-    </form>
+    <div class="flex justify-around">
+      <h1 id="home-team-name"></h1>
+      <span>vs</span>
+      <h1 id="away-team-name"></h1>
+    </div>
   </body>
-  <script type="module" src="/scripts/new-game-page.js"></script>
+  <script type="module" src="/scripts/game-page.js"></script>
 </html>
 

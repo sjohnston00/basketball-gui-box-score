@@ -20,3 +20,22 @@ export async function getGames(): Promise<PopulatedGame[]> {
 export async function deleteGame(gameId: string) {
   await gamesTable.removeItem(gameId)
 }
+
+export async function getGameById(gameId: string): Promise<PopulatedGame | undefined> {
+  const game = (await gamesTable.getItem(gameId)) as Record<string, any> | undefined
+  if (!game) return undefined
+
+  return {
+    key: gameId,
+    homeTeam: await getTeamById(game.homeTeamId),
+    awayTeam: await getTeamById(game.awayTeamId),
+    homeTeamId: game.homeTeamId,
+    awayTeamId: game.awayTeamId,
+    homeTeamShots: game.homeTeamShots,
+    awayTeamShots: game.awayTeamShots,
+    createdAt: game.createdAt,
+    finished: game.finished,
+    ...game,
+  }
+}
+
