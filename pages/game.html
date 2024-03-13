@@ -24,7 +24,55 @@
       <span>vs</span>
       <h1 id="away-team-name"></h1>
     </div>
+    <div class="flex gap-2">
+      <canvas id="court-canvas" height="400" width="438" class="bg-red-500"></canvas>
+      <div>
+        <h2 id="stats-home-team-name"></h2>
+        <table id="stats-home-table" class="min-h-48">
+          <thead>
+            <tr>
+              <th>#</th>
+              <th>Name</th>
+              <th>PTS</th>
+              <th>AST</th>
+              <th>REB</th>
+              <th>2PM</th>
+              <th>2PA</th>
+              <th>2P%</th>
+              <th>3PM</th>
+              <th>3PA</th>
+              <th>3P%</th>
+              <th>FGM</th>
+              <th>FGA</th>
+              <th>FG%</th>
+            </tr>
+          </thead>
+          <tbody id="stats-home-table-tbody"></tbody>
+        </table>
+        <h2 id="stats-away-team-name" class="mt-8"></h2>
+        <table id="stats-away-table" class="min-h-48">
+          <thead>
+            <tr>
+              <th>#</th>
+              <th>Name</th>
+              <th>PTS</th>
+              <th>AST</th>
+              <th>REB</th>
+              <th>2PM</th>
+              <th>2PA</th>
+              <th>2P%</th>
+              <th>3PM</th>
+              <th>3PA</th>
+              <th>3P%</th>
+              <th>FGM</th>
+              <th>FGA</th>
+              <th>FG%</th>
+            </tr>
+          </thead>
+          <tbody id="stats-away-table-tbody"></tbody>
+        </table>
+      </div>
+    </div>
   </body>
   <script type="module" src="/scripts/game-page.js"></script>
 </html>
-
