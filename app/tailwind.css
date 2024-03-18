@@ -1,0 +1,37 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+h1 {
+	@apply text-2xl font-bold;
+}
+
+h2 {
+	@apply text-xl font-semibold;
+}
+
+button {
+	@apply border border-gray-600 p-1 bg-gray-100 active:opacity-80 active:scale-90 transition;
+}
+
+input,
+select {
+	@apply border border-gray-600 p-1 bg-gray-100;
+}
+
+th,
+td {
+	@apply border border-gray-400 p-1;
+}
+
+label {
+	@apply block;
+}
+
+tbody tr:nth-child(odd) {
+	@apply bg-gray-300;
+}
+
+a {
+	@apply underline;
+}
