@@ -13,7 +13,7 @@
     "dev": "run-p dev:*",
     "build": "run-s build:css build:vite",
     "dev:css": "tailwindcss -i app/tailwind.css -o app/styles.css --watch",
-    "build:css": "tailwindcss -i app/tailwind.css -o public/styles.css",
+    "build:css": "tailwindcss -i app/tailwind.css -o app/styles.css",
     "__dev:js": "esbuild src/*.ts --bundle --target=es2020 --watch --sourcemap --outdir=scripts --servedir=.",
     "__build:js": "esbuild index.ts --bundle --minify --target=es2020 --outfile=index.js",
     "format": "prettier . --write"
