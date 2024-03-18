@@ -20,8 +20,10 @@ function NavLink({ children, to, className }: NavLinkProps) {
     <RemixNavLink
       className={({ isActive }) =>
         twMerge(
-          'p-4 no-underline border-b-2',
-          isActive ? 'border-b-indigo-600' : 'border-b-transparent',
+          'p-4 no-underline border-b-2 transition duration-75',
+          isActive
+            ? 'border-b-indigo-600 bg-indigo-50'
+            : 'border-b-transparent hover:border-b-indigo-100',
           className
         )
       }
