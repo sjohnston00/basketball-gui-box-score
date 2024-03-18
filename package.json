@@ -27,7 +27,6 @@
     "react": "^18.2.0",
     "react-dom": "^18.2.0",
     "@faker-js/faker": "^8.4.1",
-    "@tailwindcss/cli": "^4.0.0-alpha.6",
     "esbuild": "^0.20.1",
     "localforage": "^1.10.0"
   },
