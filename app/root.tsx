@@ -1,6 +1,5 @@
 import { Links, Meta, Outlet, Scripts, ScrollRestoration } from '@remix-run/react'
-
-export const links = () => [{ rel: 'stylesheet', href: '/styles.css' }]
+import './styles.css'
 
 export function Layout({ children }: { children: React.ReactNode }) {
   return (
