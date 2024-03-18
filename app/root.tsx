@@ -9,6 +9,14 @@ export const meta: MetaFunction = () => [
   },
 ]
 
+export const clientLoader = () => {
+  if (navigator.storage && navigator.storage.persist) {
+    navigator.storage.persist()
+  }
+
+  return null
+}
+
 export function Layout({ children }: { children: React.ReactNode }) {
   return (
     <html lang="en">
@@ -16,6 +24,10 @@ export function Layout({ children }: { children: React.ReactNode }) {
         <meta charSet="utf-8" />
         <meta name="viewport" content="width=device-width, initial-scale=1" />
         <link rel="shortcut icon" type="image/x-icon" href="favicon.ico" />
+        <meta name="HandheldFriendly" content="true" />
+        <meta name="apple-mobile-web-app-capable" content="yes" />
+        <meta name="apple-mobile-web-app-status-bar-style" content="black" />
+        <link rel="manifest" href="manifest.webmanifest" />
         <Meta />
         <Links />
       </head>

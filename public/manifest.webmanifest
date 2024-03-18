@@ -1,0 +1,23 @@
+{
+  "name": "Basketball stats",
+  "short_name": "B Stats",
+  "start_url": "/",
+  "id": "/",
+  "display": "standalone",
+  "screenshots": [
+    {
+      "src": "desktop-screenshot.png",
+      "sizes": "1915x911",
+      "type": "image/png",
+      "form_factor": "wide",
+      "label": "Homescreen of Awesome App"
+    }
+  ],
+  "icons": [
+    {
+      "src": "icon.png",
+      "sizes": "144x144",
+      "type": "image/png"
+    }
+  ]
+}
