@@ -1,12 +1,67 @@
-import { useParams } from '@remix-run/react'
+import { ClientLoaderFunctionArgs, Link, redirect, useLoaderData } from '@remix-run/react'
+import { teamsTable } from 'src/indexeddb'
+import { playersTable } from '~/utils/indexeddb'
+
+export const clientLoader = async ({ params }: ClientLoaderFunctionArgs) => {
+  const teamId = params.id
+  if (!teamId) {
+    throw redirect('/teams')
+  }
+  const team = await teamsTable.getItem<{
+    name: string
+    createdAt: Date
+    updatedAt: Date
+  }>(teamId)
+  if (!team) {
+    throw new Response('team not found', {
+      status: 404,
+    })
+  }
+
+  const players: any[] = []
+  await playersTable.iterate<any>((p, k) => {
+    players.push({ id: k, ...p })
+  })
+
+  return {
+    team: {
+      ...team,
+      id: teamId,
+      players,
+    },
+  }
+}
 
 export default function Page() {
-  const { id } = useParams()
+  const { team } = useLoaderData<typeof clientLoader>()
 
   return (
     <div>
       <h1>Teams</h1>
-      <span>Team ID: {id}</span>
+      <div className="flex justify-between items-center">
+        <h2>{team.name}</h2>
+        <Link to={`/teams/${team.id}/edit`}>Edit</Link>
+      </div>
+      <h3>Players</h3>
+      <table>
+        <thead>
+          <tr>
+            <th>#</th>
+            <th>Name</th>
+          </tr>
+        </thead>
+        <tbody>
+          {team.players.map((player) => (
+            <tr key={player.id}>
+              <td>
+                <Link to={`/players/${player.id}`}>{player.number}</Link>
+              </td>
+              <td>{player.name}</td>
+            </tr>
+          ))}
+        </tbody>
+      </table>
     </div>
   )
 }
+
