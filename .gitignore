@@ -5,3 +5,4 @@ app/styles.css
 /build
 /public/build
 .env
+.DS_Store

@@ -6,7 +6,9 @@ export const clientAction = async ({ request }: ClientActionFunctionArgs) => {
   const formData = await request.formData()
   const data = Object.fromEntries(formData)
 
-  await teamsTable.setItem(team_uuid(), data)
+  const name = data.name.toString().trim()
+
+  await teamsTable.setItem(team_uuid(), { name, createdAt: new Date(), updatedAt: new Date() })
 
   throw redirect('/teams')
 }
@@ -24,3 +26,4 @@ export default function Page() {
     </div>
   )
 }
+

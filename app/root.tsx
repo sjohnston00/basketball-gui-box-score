@@ -27,7 +27,7 @@ export function Layout({ children }: { children: React.ReactNode }) {
         <meta name="HandheldFriendly" content="true" />
         <meta name="apple-mobile-web-app-capable" content="yes" />
         <meta name="apple-mobile-web-app-status-bar-style" content="black" />
-        <link rel="manifest" href="manifest.webmanifest" />
+        <link rel="manifest" href="/basketball-gui-box-score/manifest.webmanifest" />
         <Meta />
         <Links />
       </head>
