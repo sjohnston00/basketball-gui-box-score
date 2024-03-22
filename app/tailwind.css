@@ -28,10 +28,21 @@ label {
 	@apply block;
 }
 
+tbody tr {
+	@apply transition duration-75;
+}
+
 tbody tr:nth-child(odd) {
-	@apply bg-gray-300;
+	@apply bg-gray-100;
+}
+tbody tr:hover {
+	@apply bg-gray-200;
 }
 
 a {
 	@apply underline;
+}
+
+.box-score-table tbody tr td {
+	@apply text-center;
 }

@@ -29,8 +29,7 @@ export const clientAction = async ({ request }: ClientActionFunctionArgs) => {
   await gamesTable.setItem(game_uuid(), {
     homeTeamId: data.homeTeam,
     awayTeamId: data.awayTeam,
-    homeTeamShots: [],
-    awayTeamShots: [],
+    shots: [],
     createdAt: new Date(),
     updatedAt: new Date(),
   })

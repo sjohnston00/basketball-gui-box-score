@@ -1,12 +1,14 @@
 import {
+  ClientActionFunctionArgs,
   ClientLoaderFunctionArgs,
-  Link,
+  Form,
   redirect,
   useLoaderData,
-  useParams,
 } from '@remix-run/react'
-import React from 'react'
-import { gamesTable, teamsTable } from '~/utils/indexeddb'
+import React, { useEffect, useRef } from 'react'
+import { gamesTable, playersTable, teamsTable } from '~/utils/indexeddb'
+
+let currentGame = {}
 
 export const clientLoader = async ({ params }: ClientLoaderFunctionArgs) => {
   const gameId = params.id
@@ -21,30 +23,172 @@ export const clientLoader = async ({ params }: ClientLoaderFunctionArgs) => {
 
   const teams: any[] = []
 
-  await teamsTable.iterate((value: Record<string, any>, key) => {
-    teams.push({ id: key, ...value })
+  await teamsTable.iterate((value: Record<string, any>, teamId) => {
+    teams.push({ id: teamId, ...value })
+  })
+
+  const players: any = []
+  await playersTable.iterate((player: Record<string, any>, playerId) => {
+    players.push({ id: playerId, ...player })
+  })
+
+  const gameData = {
+    ...game,
+    homeTeam: {
+      ...teams.find((team) => team.id === game.homeTeamId),
+      players: players.filter((player) => player.teamId === game.homeTeamId),
+    },
+    awayTeam: {
+      ...teams.find((team) => team.id === game.awayTeamId),
+      players: players.filter((player) => player.teamId === game.awayTeamId),
+    },
+    homeTeamScore:
+      game.shots.filter((s) => s.playerTeamId === game.homeTeamId && s.made).length * 2,
+    awayTeamScore:
+      game.shots.filter((s) => s.playerTeamId === game.awayTeamId && s.made).length * 2,
+  }
+
+  //TODO: filter the assist players select box by players on their team
+  //TODO: add isThreePointer boolean to shot object and calculate score based on that
+  //TODO: add freeThrow shots array to game object and calculate score based on that
+  //TODO: add total footer rows for each team box score table and calculate totals
+  //TODO: calculate percentages based for shot types
+  //TODO: add column for total FGM, FGA and FG%
+
+  currentGame = gameData
+  return {
+    game: gameData,
+    teams: teams,
+  }
+}
+
+export const clientAction = async ({ params, request }: ClientActionFunctionArgs) => {
+  const gameId = params.id
+  if (!gameId) {
+    throw redirect('/games')
+  }
+
+  const game = await gamesTable.getItem(gameId)
+  if (!game) {
+    throw new Response('Game not found', { status: 404 })
+  }
+
+  const formData = await request.formData()
+  const data = Object.fromEntries(formData)
+
+  const shotPlayerId = data.shotPlayerId
+  const assistPlayerId = data.assistPlayerId
+  const shotMade = data.shotMade === 'true'
+
+  const playerTeamId = currentGame.homeTeam.players.find((player) => player.id === shotPlayerId)
+    ? currentGame.homeTeamId
+    : currentGame.awayTeam.players.find((player) => player.id === shotPlayerId)
+      ? currentGame.awayTeamId
+      : undefined
+
+  if (!playerTeamId) {
+    alert('Player not found')
+    return null
+  }
+
+  currentGame.shots.push({
+    playerId: shotPlayerId,
+    playerTeamId,
+    made: shotMade,
+    assistPlayerId: shotMade && assistPlayerId ? assistPlayerId : undefined,
+    createdAt: new Date(),
+  })
+
+  await gamesTable.setItem(gameId, {
+    ...game,
+    shots: currentGame.shots,
+    updatedAt: new Date(),
   })
 
   return {
-    game: {
-      ...game,
-      homeTeam: { ...teams.find((team) => team.id === game.homeTeamId), players: [] },
-      awayTeam: { ...teams.find((team) => team.id === game.awayTeamId), players: [] },
-      homeTeamScore: 0,
-      awayTeamScore: 0,
-    },
-    teams: teams,
+    data,
   }
 }
 
 export default function Page() {
   const { game } = useLoaderData<typeof clientLoader>()
+  const dialogRef = useRef<HTMLDialogElement>(null)
+  const dialogDivRef = useRef<HTMLDivElement>(null)
+  const addShotFormRef = useRef<HTMLFormElement>(null)
   const homeTeamName = game.homeTeam.name
   const awayTeamName = game.awayTeam.name
   const homeTeamScore = game.homeTeamScore
   const awayTeamScore = game.awayTeamScore
+
+  useEffect(() => {
+    dialogRef.current?.addEventListener('click', () => dialogRef.current?.close())
+    dialogDivRef.current?.addEventListener('click', (e) => e.stopPropagation())
+
+    return () => {
+      dialogRef.current?.removeEventListener('click', () => dialogRef.current?.close())
+      dialogDivRef.current?.removeEventListener('click', (e) => e.stopPropagation())
+    }
+  }, [])
+
   return (
     <div>
+      <dialog ref={dialogRef}>
+        <div ref={dialogDivRef} className="p-4">
+          <div className="flex justify-between items-center">
+            <h1>Add shot</h1>
+            <form method="dialog">
+              <button>x</button>
+            </form>
+          </div>
+          <Form
+            ref={addShotFormRef}
+            method="post"
+            className="w-full"
+            onSubmit={() => {
+              dialogRef.current?.close()
+            }}
+          >
+            <div className="my-4 flex justify-around items-center gap-2">
+              <label>
+                <input type="radio" name="shotMade" value="true" required />
+                make
+              </label>
+              <label>
+                <input type="radio" name="shotMade" value="false" required />
+                miss
+              </label>
+            </div>
+            <h2>Player shot</h2>
+            <select name="shotPlayerId" id="shotPlayerId" required>
+              {game.homeTeam.players.map((player) => (
+                <option key={player.id} value={player.id}>
+                  {player.name}
+                </option>
+              ))}
+              {game.awayTeam.players.map((player) => (
+                <option key={player.id} value={player.id}>
+                  {player.name}
+                </option>
+              ))}
+            </select>
+            <h2>Assisted by</h2>
+            <select name="assistPlayerId" id="assistPlayerId">
+              <option value="">No assist</option>
+              {game.homeTeam.players.map((player) => (
+                <option key={player.id} value={player.id}>
+                  {player.name}
+                </option>
+              ))}
+              {game.awayTeam.players.map((player) => (
+                <option key={player.id} value={player.id}>
+                  {player.name}
+                </option>
+              ))}
+            </select>
+            <button className="block w-full mt-4 p-2 rounded">save</button>
+          </Form>
+        </div>
+      </dialog>
       <h1>Games</h1>
       <div className="flex justify-evenly mb-8">
         <div className="flex flex-col items-center">
@@ -60,6 +204,9 @@ export default function Page() {
         <canvas
           height={450}
           width={400}
+          onClick={(event) => {
+            dialogRef.current?.showModal()
+          }}
           style={{
             backgroundColor: 'black',
           }}
@@ -68,57 +215,11 @@ export default function Page() {
           <div className="flex justify-between items-center">
             <span>{homeTeamName}</span>
           </div>
-          <BoxScoreTable>
-            {game.homeTeam.players.map((player) => (
-              <tr key={player.id}>
-                <td>{player.number}</td>
-                <td>{player.name}</td>
-                <td>{player.points}</td>
-                <td>{player.assists}</td>
-                <td>{player.rebounds}</td>
-                <td>{player.twoPointsMade}</td>
-                <td>{player.twoPointsAttempted}</td>
-                <td>{player.twoPointsPercentage}</td>
-                <td>{player.threePointsMade}</td>
-                <td>{player.threePointsAttempted}</td>
-                <td>{player.threePointsPercentage}</td>
-                <td>{player.freeThrowsMade}</td>
-                <td>{player.freeThrowsAttempted}</td>
-                <td>{player.freeThrowsPercentage}</td>
-                <td>{player.steals}</td>
-                <td>{player.blocks}</td>
-                <td>{player.turnovers}</td>
-                <td>{player.personalFouls}</td>
-              </tr>
-            ))}
-          </BoxScoreTable>
+          <BoxScoreTable players={game.homeTeam.players} shots={game.shots}></BoxScoreTable>
           <div className="flex justify-between items-center mt-4">
             <span>{awayTeamName}</span>
           </div>
-          <BoxScoreTable>
-            {game.homeTeam.players.map((player) => (
-              <tr key={player.id}>
-                <td>{player.number}</td>
-                <td>{player.name}</td>
-                <td>{player.points}</td>
-                <td>{player.assists}</td>
-                <td>{player.rebounds}</td>
-                <td>{player.twoPointsMade}</td>
-                <td>{player.twoPointsAttempted}</td>
-                <td>{player.twoPointsPercentage}</td>
-                <td>{player.threePointsMade}</td>
-                <td>{player.threePointsAttempted}</td>
-                <td>{player.threePointsPercentage}</td>
-                <td>{player.freeThrowsMade}</td>
-                <td>{player.freeThrowsAttempted}</td>
-                <td>{player.freeThrowsPercentage}</td>
-                <td>{player.steals}</td>
-                <td>{player.blocks}</td>
-                <td>{player.turnovers}</td>
-                <td>{player.personalFouls}</td>
-              </tr>
-            ))}
-          </BoxScoreTable>
+          <BoxScoreTable players={game.awayTeam.players} shots={game.shots}></BoxScoreTable>
         </div>
       </div>
     </div>
@@ -127,14 +228,16 @@ export default function Page() {
 
 type BoxScoreTableProps = {
   children?: React.ReactNode
+  players: any[]
+  shots: any[]
 }
-function BoxScoreTable({ children }: BoxScoreTableProps) {
+function BoxScoreTable({ children, players, shots }: BoxScoreTableProps) {
   return (
-    <table>
+    <table className="w-full box-score-table">
       <thead>
         <tr>
           <th>#</th>
-          <th>Name</th>
+          <th className="!text-left">Name</th>
           <th>PTS</th>
           <th>AST</th>
           <th>REB</th>
@@ -153,8 +256,38 @@ function BoxScoreTable({ children }: BoxScoreTableProps) {
           <th>FLS</th>
         </tr>
       </thead>
-      <tbody>{children}</tbody>
+      <tbody>
+        {players.map((player) => {
+          const playersTwoPointShots = shots.filter((shot) => shot.playerId === player.id)
+          const playersTwoPointsMade = playersTwoPointShots.filter((shot) => shot.made)
+          const playersPoints = playersTwoPointsMade.length * 2
+
+          const playersAssists = shots.filter((shot) => shot.assistPlayerId === player.id)
+
+          return (
+            <tr key={player.id}>
+              <td>{player.number}</td>
+              <td className="!text-left">{player.name}</td>
+              <td>{playersPoints}</td>
+              <td>{playersAssists.length}</td>
+              <td>{player.rebounds || 0}</td>
+              <td>{playersTwoPointsMade.length}</td>
+              <td>{playersTwoPointShots.length}</td>
+              <td>{player.twoPointsPercentage || 0}%</td>
+              <td>{player.threePointsMade || 0}</td>
+              <td>{player.threePointsAttempted || 0}</td>
+              <td>{player.threePointsPercentage || 0}%</td>
+              <td>{player.freeThrowsMade || 0}</td>
+              <td>{player.freeThrowsAttempted || 0}</td>
+              <td>{player.freeThrowsPercentage || 0}%</td>
+              <td>{player.steals || 0}</td>
+              <td>{player.blocks || 0}</td>
+              <td>{player.turnovers || 0}</td>
+              <td>{player.personalFouls || 0}</td>
+            </tr>
+          )
+        })}
+      </tbody>
     </table>
   )
 }
-

@@ -11,8 +11,12 @@ export const clientLoader = async () => {
   const games: any[] = []
 
   await gamesTable.iterate((value: Record<string, any>, key) => {
-    const homeTeamScore = value.homeTeamShots.reduce((acc, curr) => (acc + curr.made ? 2 : 0), 0)
-    const awayTeamScore = value.awayTeamShots.reduce((acc, curr) => (acc + curr.made ? 2 : 0), 0)
+    const homeTeamScore = value.shots
+      .filter((s) => s.teamId === value.homeTeamId)
+      .reduce((acc, curr) => (acc + curr.made ? 2 : 0), 0)
+    const awayTeamScore = value.shots
+      .filter((s) => s.teamId === value.awayTeamId)
+      .reduce((acc, curr) => (acc + curr.made ? 2 : 0), 0)
 
     games.push({
       id: key,
