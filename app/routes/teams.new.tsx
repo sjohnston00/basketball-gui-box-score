@@ -1,5 +1,5 @@
 import { ClientActionFunctionArgs, Form, redirect } from '@remix-run/react'
-import { teamsTable } from 'src/indexeddb'
+import { teamsTable } from '~/utils/indexeddb'
 import { team_uuid } from '~/utils/uuid'
 
 export const clientAction = async ({ request }: ClientActionFunctionArgs) => {
@@ -26,4 +26,3 @@ export default function Page() {
     </div>
   )
 }
-

@@ -1,6 +1,5 @@
 import { ClientActionFunctionArgs, Form, Link, redirect, useLoaderData } from '@remix-run/react'
-import { teamsTable } from 'src/indexeddb'
-import { gamesTable } from '~/utils/indexeddb'
+import { gamesTable, teamsTable } from '~/utils/indexeddb'
 import { game_uuid } from '~/utils/uuid'
 
 export const clientLoader = async () => {

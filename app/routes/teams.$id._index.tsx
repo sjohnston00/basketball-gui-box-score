@@ -1,6 +1,5 @@
 import { ClientLoaderFunctionArgs, Link, redirect, useLoaderData } from '@remix-run/react'
-import { teamsTable } from 'src/indexeddb'
-import { playersTable } from '~/utils/indexeddb'
+import { playersTable, teamsTable } from '~/utils/indexeddb'
 
 export const clientLoader = async ({ params }: ClientLoaderFunctionArgs) => {
   const teamId = params.id
@@ -64,4 +63,3 @@ export default function Page() {
     </div>
   )
 }
-

@@ -1,5 +1,5 @@
 import { ClientActionFunctionArgs, Form, Link, useLoaderData } from '@remix-run/react'
-import { teamsTable } from 'src/indexeddb'
+import { teamsTable } from '~/utils/indexeddb'
 
 export const clientLoader = async () => {
   const teams: any[] = []
