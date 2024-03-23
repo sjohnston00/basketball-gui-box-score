@@ -1,11 +1,13 @@
 import { Player } from './player'
 
 export type Team = {
-  key: string
+  id: string
   name: string
   abbvr: string
   players: Player[]
   createdAt: Date
 }
 
-export type NewTeam = Omit<Team, 'key' | 'createdAt' | 'players'>
+export type IndexedDBTeam = Omit<Team, 'id'>
+
+export type NewTeam = Omit<Team, 'id' | 'createdAt' | 'players'>

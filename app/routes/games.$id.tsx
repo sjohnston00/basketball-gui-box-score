@@ -5,10 +5,14 @@ import {
   redirect,
   useLoaderData,
 } from '@remix-run/react'
-import React, { useEffect, useRef } from 'react'
-import { gamesTable, playersTable, teamsTable } from '~/utils/indexeddb'
+import { useEffect, useRef } from 'react'
+import { PopulatedGame, GameShot } from '~/utils/types/game'
+import { getGameById } from '~/utils/games'
+import { gamesTable } from '~/utils/indexeddb'
+import { Player } from '~/utils/types/player'
+import { percentage } from '~/utils/math'
 
-let currentGame = {}
+let currentGame: PopulatedGame | undefined
 
 export const clientLoader = async ({ params }: ClientLoaderFunctionArgs) => {
   const gameId = params.id
@@ -16,36 +20,9 @@ export const clientLoader = async ({ params }: ClientLoaderFunctionArgs) => {
     throw redirect('/games')
   }
 
-  const game = await gamesTable.getItem(gameId)
+  const game = await getGameById(gameId)
   if (!game) {
     throw new Response('Game not found', { status: 404 })
-  }
-
-  const teams: any[] = []
-
-  await teamsTable.iterate((value: Record<string, any>, teamId) => {
-    teams.push({ id: teamId, ...value })
-  })
-
-  const players: any = []
-  await playersTable.iterate((player: Record<string, any>, playerId) => {
-    players.push({ id: playerId, ...player })
-  })
-
-  const gameData = {
-    ...game,
-    homeTeam: {
-      ...teams.find((team) => team.id === game.homeTeamId),
-      players: players.filter((player) => player.teamId === game.homeTeamId),
-    },
-    awayTeam: {
-      ...teams.find((team) => team.id === game.awayTeamId),
-      players: players.filter((player) => player.teamId === game.awayTeamId),
-    },
-    homeTeamScore:
-      game.shots.filter((s) => s.playerTeamId === game.homeTeamId && s.made).length * 2,
-    awayTeamScore:
-      game.shots.filter((s) => s.playerTeamId === game.awayTeamId && s.made).length * 2,
   }
 
   //TODO: filter the assist players select box by players on their team
@@ -55,10 +32,9 @@ export const clientLoader = async ({ params }: ClientLoaderFunctionArgs) => {
   //TODO: calculate percentages based for shot types
   //TODO: add column for total FGM, FGA and FG%
 
-  currentGame = gameData
+  currentGame = game
   return {
-    game: gameData,
-    teams: teams,
+    game,
   }
 }
 
@@ -80,9 +56,11 @@ export const clientAction = async ({ params, request }: ClientActionFunctionArgs
   const assistPlayerId = data.assistPlayerId
   const shotMade = data.shotMade === 'true'
 
-  const playerTeamId = currentGame.homeTeam.players.find((player) => player.id === shotPlayerId)
+  const playerTeamId = currentGame?.homeTeam.players.find(
+    (player: Player) => player.id === shotPlayerId
+  )
     ? currentGame.homeTeamId
-    : currentGame.awayTeam.players.find((player) => player.id === shotPlayerId)
+    : currentGame?.awayTeam.players.find((player: Player) => player.id === shotPlayerId)
       ? currentGame.awayTeamId
       : undefined
 
@@ -91,17 +69,17 @@ export const clientAction = async ({ params, request }: ClientActionFunctionArgs
     return null
   }
 
-  currentGame.shots.push({
-    playerId: shotPlayerId,
+  currentGame?.shots.push({
+    playerId: shotPlayerId.toString(),
     playerTeamId,
     made: shotMade,
-    assistPlayerId: shotMade && assistPlayerId ? assistPlayerId : undefined,
+    assistPlayerId: shotMade && assistPlayerId ? assistPlayerId.toString() : undefined,
     createdAt: new Date(),
   })
 
   await gamesTable.setItem(gameId, {
     ...game,
-    shots: currentGame.shots,
+    shots: currentGame?.shots,
     updatedAt: new Date(),
   })
 
@@ -204,7 +182,7 @@ export default function Page() {
         <canvas
           height={450}
           width={400}
-          onClick={(event) => {
+          onClick={() => {
             dialogRef.current?.showModal()
           }}
           style={{
@@ -215,11 +193,11 @@ export default function Page() {
           <div className="flex justify-between items-center">
             <span>{homeTeamName}</span>
           </div>
-          <BoxScoreTable players={game.homeTeam.players} shots={game.shots}></BoxScoreTable>
+          <BoxScoreTable players={game.homeTeam.players} shots={game.shots} />
           <div className="flex justify-between items-center mt-4">
             <span>{awayTeamName}</span>
           </div>
-          <BoxScoreTable players={game.awayTeam.players} shots={game.shots}></BoxScoreTable>
+          <BoxScoreTable players={game.awayTeam.players} shots={game.shots} />
         </div>
       </div>
     </div>
@@ -227,11 +205,10 @@ export default function Page() {
 }
 
 type BoxScoreTableProps = {
-  children?: React.ReactNode
-  players: any[]
-  shots: any[]
+  players: Player[]
+  shots: GameShot[]
 }
-function BoxScoreTable({ children, players, shots }: BoxScoreTableProps) {
+function BoxScoreTable({ players, shots }: BoxScoreTableProps) {
   return (
     <table className="w-full box-score-table">
       <thead>
@@ -260,6 +237,10 @@ function BoxScoreTable({ children, players, shots }: BoxScoreTableProps) {
         {players.map((player) => {
           const playersTwoPointShots = shots.filter((shot) => shot.playerId === player.id)
           const playersTwoPointsMade = playersTwoPointShots.filter((shot) => shot.made)
+          const playersTwoPointPercentage = percentage(
+            playersTwoPointsMade.length,
+            playersTwoPointShots.length
+          ).toFixed(0)
           const playersPoints = playersTwoPointsMade.length * 2
 
           const playersAssists = shots.filter((shot) => shot.assistPlayerId === player.id)
@@ -273,7 +254,7 @@ function BoxScoreTable({ children, players, shots }: BoxScoreTableProps) {
               <td>{player.rebounds || 0}</td>
               <td>{playersTwoPointsMade.length}</td>
               <td>{playersTwoPointShots.length}</td>
-              <td>{player.twoPointsPercentage || 0}%</td>
+              <td>{playersTwoPointPercentage}%</td>
               <td>{player.threePointsMade || 0}</td>
               <td>{player.threePointsAttempted || 0}</td>
               <td>{player.threePointsPercentage || 0}%</td>

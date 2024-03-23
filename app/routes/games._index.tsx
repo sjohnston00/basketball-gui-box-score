@@ -1,34 +1,10 @@
 import { ClientActionFunctionArgs, Form, Link, useLoaderData } from '@remix-run/react'
-import { gamesTable, teamsTable } from '~/utils/indexeddb'
+import { getGames } from '~/utils/games'
+import { gamesTable } from '~/utils/indexeddb'
 
 export const clientLoader = async () => {
-  const teams: any[] = []
-
-  await teamsTable.iterate((value: Record<string, any>, key) => {
-    teams.push({ id: key, ...value })
-  })
-
-  const games: any[] = []
-
-  await gamesTable.iterate((value: Record<string, any>, key) => {
-    const homeTeamScore = value.shots
-      .filter((s) => s.teamId === value.homeTeamId)
-      .reduce((acc, curr) => (acc + curr.made ? 2 : 0), 0)
-    const awayTeamScore = value.shots
-      .filter((s) => s.teamId === value.awayTeamId)
-      .reduce((acc, curr) => (acc + curr.made ? 2 : 0), 0)
-
-    games.push({
-      id: key,
-      homeTeam: teams.find((t) => t.id === value.homeTeamId),
-      awayTeam: teams.find((t) => t.id === value.awayTeamId),
-      homeTeamScore: homeTeamScore,
-      awayTeamScore: awayTeamScore,
-      ...value,
-    })
-  })
+  const games = await getGames()
   return {
-    teams,
     games,
   }
 }
@@ -75,7 +51,7 @@ export default function Page() {
               <td>
                 <Link to={`/teams/${game.awayTeam.id}`}>{game.awayTeam.name}</Link>
               </td>
-              <td>{game.createdAt.toLocaleDateString()}</td>
+              <td>{new Date(game.createdAt).toLocaleDateString()}</td>
               <td>
                 <div className="flex items-center gap-2">
                   <Link to={`/games/${game.id}`}>Edit</Link>
