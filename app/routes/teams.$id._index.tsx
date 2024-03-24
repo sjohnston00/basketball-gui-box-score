@@ -1,33 +1,20 @@
 import { ClientLoaderFunctionArgs, Link, redirect, useLoaderData } from '@remix-run/react'
-import { playersTable, teamsTable } from '~/utils/indexeddb'
+import { getTeamById } from '~/utils/teams'
 
 export const clientLoader = async ({ params }: ClientLoaderFunctionArgs) => {
   const teamId = params.id
   if (!teamId) {
     throw redirect('/teams')
   }
-  const team = await teamsTable.getItem<{
-    name: string
-    createdAt: Date
-    updatedAt: Date
-  }>(teamId)
+  const team = await getTeamById(teamId)
   if (!team) {
     throw new Response('team not found', {
       status: 404,
     })
   }
 
-  const players: any[] = []
-  await playersTable.iterate<any>((p, k) => {
-    players.push({ id: k, ...p })
-  })
-
   return {
-    team: {
-      ...team,
-      id: teamId,
-      players,
-    },
+    team,
   }
 }
 
@@ -63,3 +50,4 @@ export default function Page() {
     </div>
   )
 }
+

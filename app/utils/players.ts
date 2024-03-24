@@ -1,5 +1,5 @@
 import { playersTable } from '~/utils/indexeddb'
-import type { IndexedDBPlayer, NewPlayer, Player } from '~/utils/types/player'
+import type { IndexedDBPlayer, NewPlayer, Player, UpdatePlayer } from '~/utils/types/player'
 import { player_uuid } from '~/utils/uuid'
 
 export async function getPlayers(): Promise<Player[]> {
@@ -16,9 +16,10 @@ export async function getPlayers(): Promise<Player[]> {
 }
 
 export async function createPlayer(newPlayer: NewPlayer): Promise<void> {
-  const player: Omit<Player, 'id'> = {
+  const player: IndexedDBPlayer = {
     ...newPlayer,
     createdAt: new Date(),
+    updatedAt: new Date(),
   }
 
   const playerId = player_uuid()
@@ -30,15 +31,12 @@ export async function deletePlayer(id: string): Promise<void> {
 }
 
 export async function getPlayerById(playerId: string): Promise<Player | undefined> {
-  const player = (await playersTable.getItem(playerId)) as IndexedDBPlayer | undefined
+  const player = await playersTable.getItem<IndexedDBPlayer>(playerId)
   if (!player) return undefined
 
   return {
     id: playerId,
-    name: player.name,
-    number: player.number,
-    teamId: player.teamId,
-    createdAt: player.createdAt,
+    ...player,
   }
 }
 
@@ -54,3 +52,16 @@ export async function getPlayersForTeam(teamId: string, players?: Player[]): Pro
   }
   return teamPlayers
 }
+
+export async function updatePlayer(playerId: string, updatedPlayer: UpdatePlayer): Promise<void> {
+  const player: IndexedDBPlayer = {
+    name: updatedPlayer.name,
+    number: updatedPlayer.number,
+    createdAt: updatedPlayer.createdAt,
+    teamId: updatedPlayer.teamId,
+    updatedAt: new Date(),
+  }
+
+  await playersTable.setItem<IndexedDBPlayer>(playerId, player)
+}
+

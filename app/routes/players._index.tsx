@@ -1,18 +1,17 @@
 import { ClientActionFunctionArgs, Form, Link, useLoaderData } from '@remix-run/react'
-import { playersTable, teamsTable } from '~/utils/indexeddb'
+import { deletePlayer, getPlayers } from '~/utils/players'
+import { getTeams } from '~/utils/teams'
 
 export const clientLoader = async () => {
-  const teams: any[] = []
+  const teams = await getTeams()
 
-  await teamsTable.iterate((value: Record<string, any>, key) => {
-    teams.push({ id: key, ...value })
-  })
-
-  const players: any[] = []
-
-  await playersTable.iterate((value: Record<string, any>, key) => {
-    players.push({ id: key, team: teams.find((t) => t.id === value.teamId), ...value })
-  })
+  const players = await getPlayers()
+  for (let index = 0; index < players.length; index++) {
+    players[index] = {
+      ...players[index],
+      team: teams.find((team) => team.id === players[index].teamId),
+    }
+  }
 
   return { teams, players }
 }
@@ -23,7 +22,9 @@ export const clientAction = async ({ request }: ClientActionFunctionArgs) => {
   const formData = await request.formData()
   const data = Object.fromEntries(formData)
 
-  await playersTable.removeItem(data.playerId.toString())
+  const playerId = data.playerId.toString().trim()
+
+  await deletePlayer(playerId)
 
   return null
 }
@@ -75,3 +76,4 @@ export default function Page() {
     </div>
   )
 }
+

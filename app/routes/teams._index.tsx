@@ -1,25 +1,40 @@
 import { ClientActionFunctionArgs, Form, Link, useLoaderData } from '@remix-run/react'
 import { teamsTable } from '~/utils/indexeddb'
+import { updatePlayer } from '~/utils/players'
+import { getTeamById, getTeams } from '~/utils/teams'
 
 export const clientLoader = async () => {
-  const teams: any[] = []
-
-  await teamsTable.iterate((value: Record<string, any>, key) => {
-    teams.push({ id: key, ...value })
-  })
+  const teams = await getTeams()
   return {
-    teams: teams,
+    teams,
   }
 }
 
 export const clientAction = async ({ request }: ClientActionFunctionArgs) => {
-  if (!confirm('Are you sure you want to delete this team?')) return null
+  if (
+    !confirm(
+      'Are you sure you want to delete this team? This will also leave the current players without a team'
+    )
+  )
+    return null
   const formData = await request.formData()
   const data = Object.fromEntries(formData)
 
-  //TODO: Check if a player is on this team,
-  //TODO: Check if there are any games for this team
-  //TODO: If there are any players on the team, make sure to set their teamId to null
+  const teamId = data.teamId.toString()
+  const team = await getTeamById(teamId)
+  if (!team) {
+    throw new Response('team not found', {
+      status: 404,
+    })
+  }
+
+  for (let index = 0; index < team.players.length; index++) {
+    const player = team.players[index]
+    await updatePlayer(player.id, {
+      ...player,
+      teamId: undefined,
+    })
+  }
 
   await teamsTable.removeItem(data.teamId.toString())
 
@@ -65,3 +80,4 @@ export default function Page() {
     </div>
   )
 }
+
