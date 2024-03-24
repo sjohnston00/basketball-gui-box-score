@@ -17,6 +17,10 @@ export const clientAction = async ({ request }: ClientActionFunctionArgs) => {
   const formData = await request.formData()
   const data = Object.fromEntries(formData)
 
+  //TODO: Check if a player is on this team,
+  //TODO: Check if there are any games for this team
+  //TODO: If there are any players on the team, make sure to set their teamId to null
+
   await teamsTable.removeItem(data.teamId.toString())
 
   return null
