@@ -5,18 +5,14 @@ import {
   redirect,
   useLoaderData,
 } from '@remix-run/react'
-import { teamsTable } from '~/utils/indexeddb'
+import { getTeamById, updateTeam } from '~/utils/teams'
 
 export const clientLoader = async ({ params }: ClientLoaderFunctionArgs) => {
   const teamId = params.id
   if (!teamId) {
     throw redirect('/teams')
   }
-  const team = await teamsTable.getItem<{
-    name: string
-    createdAt: Date
-    updatedAt: Date
-  }>(teamId)
+  const team = await getTeamById(teamId)
   if (!team) {
     throw new Response('team not found', {
       status: 404,
@@ -35,21 +31,17 @@ export const clientAction = async ({ request, params }: ClientActionFunctionArgs
   if (!teamId) {
     throw redirect('/teams')
   }
-
-  const team = await teamsTable.getItem<{
-    name: string
-    createdAt: Date
-  }>(teamId)
+  const team = await getTeamById(teamId)
   if (!team) {
     throw new Response('team not found', {
       status: 404,
     })
   }
 
-  await teamsTable.setItem(teamId, {
-    ...team,
+  await updateTeam(teamId, {
     name: data.name.toString().trim(),
-    updatedAt: new Date(),
+    abbreviation: data.abbreviation.toString().trim(),
+    createdAt: team.createdAt,
   })
 
   throw redirect('/teams')
@@ -65,9 +57,16 @@ export default function Page() {
       <Form method="post">
         <label htmlFor="name">Name</label>
         <input type="text" name="name" id="name" defaultValue={team.name} required />
+        <label htmlFor="abbreviation">Abbreviation</label>
+        <input
+          type="text"
+          name="abbreviation"
+          defaultValue={team.abbreviation}
+          id="abbreviation"
+          required
+        />
         <button>save</button>
       </Form>
     </div>
   )
 }
-

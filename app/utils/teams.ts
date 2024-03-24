@@ -1,6 +1,6 @@
 import { teamsTable } from '~/utils/indexeddb'
 import { getPlayers, getPlayersForTeam } from '~/utils/players'
-import type { IndexedDBTeam, NewTeam, Team } from '~/utils/types/team'
+import type { IndexedDBTeam, NewTeam, Team, UpdateTeam } from '~/utils/types/team'
 import { team_uuid } from '~/utils/uuid'
 
 export async function getTeams(): Promise<Team[]> {
@@ -8,10 +8,8 @@ export async function getTeams(): Promise<Team[]> {
   await teamsTable.iterate((dbTeam: IndexedDBTeam, id) => {
     const team: Team = {
       id,
-      name: dbTeam.name,
-      abbvr: dbTeam.abbvr,
+      ...dbTeam,
       players: [],
-      createdAt: dbTeam.createdAt,
     }
     teams.push(team)
   })
@@ -24,27 +22,34 @@ export async function getTeams(): Promise<Team[]> {
 }
 
 export async function createTeam(newTeam: NewTeam): Promise<void> {
-  const team: Omit<Team, 'id' | 'players'> = {
-    name: newTeam.name,
-    abbvr: newTeam.abbvr,
+  const team: IndexedDBTeam = {
+    ...newTeam,
     createdAt: new Date(),
+    updatedAt: new Date(),
   }
 
   const teamId = team_uuid()
-  await teamsTable.setItem(teamId, team)
+  await teamsTable.setItem<IndexedDBTeam>(teamId, team)
+}
+
+export async function updateTeam(teamId: string, updatedTeam: UpdateTeam): Promise<void> {
+  const team: IndexedDBTeam = {
+    ...updatedTeam,
+    updatedAt: new Date(),
+  }
+
+  await teamsTable.setItem<IndexedDBTeam>(teamId, team)
 }
 
 export async function getTeamById(teamId: string): Promise<Team | undefined> {
-  const team = (await teamsTable.getItem(teamId)) as IndexedDBTeam | undefined
-  if (!team) return undefined
+  const team = await teamsTable.getItem<IndexedDBTeam>(teamId)
+  if (!team) return
 
   const players = await getPlayersForTeam(teamId)
 
   return {
     id: teamId,
-    name: team.name,
-    abbvr: team.abbvr,
+    ...team,
     players: players,
-    createdAt: team.createdAt,
   }
 }
