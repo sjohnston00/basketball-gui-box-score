@@ -6,9 +6,11 @@ export type Game = {
   awayTeamId: string
   shots: GameShot[]
   createdAt: Date
+  updatedAt: Date
   finished: boolean
 }
 export type IndexedDBGame = Omit<Game, 'id'>
+export type NewGame = Omit<IndexedDBGame, 'finished' | 'createdAt' | 'updatedAt' | 'shots'>
 
 export type PopulatedGame = Game & {
   homeTeam: Team

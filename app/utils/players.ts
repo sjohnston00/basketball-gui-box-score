@@ -23,7 +23,7 @@ export async function createPlayer(newPlayer: NewPlayer): Promise<void> {
   }
 
   const playerId = player_uuid()
-  await playersTable.setItem(playerId, player)
+  await playersTable.setItem<IndexedDBPlayer>(playerId, player)
 }
 
 export async function deletePlayer(id: string): Promise<void> {
@@ -64,4 +64,3 @@ export async function updatePlayer(playerId: string, updatedPlayer: UpdatePlayer
 
   await playersTable.setItem<IndexedDBPlayer>(playerId, player)
 }
-

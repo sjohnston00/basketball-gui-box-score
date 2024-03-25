@@ -1,6 +1,5 @@
 import { ClientActionFunctionArgs, Form, Link, useLoaderData } from '@remix-run/react'
-import { getGames } from '~/utils/games'
-import { gamesTable } from '~/utils/indexeddb'
+import { deleteGame, getGames } from '~/utils/games'
 
 export const clientLoader = async () => {
   const games = await getGames()
@@ -13,9 +12,9 @@ export const clientAction = async ({ request }: ClientActionFunctionArgs) => {
   if (!confirm('Are you sure you want to delete this game?')) return null
   const formData = await request.formData()
   const data = Object.fromEntries(formData)
+  const gameId = data.gameId.toString().trim()
 
-  await gamesTable.removeItem(data.gameId.toString())
-
+  await deleteGame(gameId)
   return null
 }
 

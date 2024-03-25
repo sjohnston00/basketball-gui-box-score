@@ -1,7 +1,6 @@
 import { ClientActionFunctionArgs, Form, Link, useLoaderData } from '@remix-run/react'
-import { teamsTable } from '~/utils/indexeddb'
 import { updatePlayer } from '~/utils/players'
-import { getTeamById, getTeams } from '~/utils/teams'
+import { deleteTeam, getTeamById, getTeams } from '~/utils/teams'
 
 export const clientLoader = async () => {
   const teams = await getTeams()
@@ -20,7 +19,7 @@ export const clientAction = async ({ request }: ClientActionFunctionArgs) => {
   const formData = await request.formData()
   const data = Object.fromEntries(formData)
 
-  const teamId = data.teamId.toString()
+  const teamId = data.teamId.toString().trim()
   const team = await getTeamById(teamId)
   if (!team) {
     throw new Response('team not found', {
@@ -36,7 +35,7 @@ export const clientAction = async ({ request }: ClientActionFunctionArgs) => {
     })
   }
 
-  await teamsTable.removeItem(data.teamId.toString())
+  await deleteTeam(teamId)
 
   return null
 }
@@ -80,4 +79,3 @@ export default function Page() {
     </div>
   )
 }
-

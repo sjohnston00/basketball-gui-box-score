@@ -1,15 +1,12 @@
 import { ClientActionFunctionArgs, Form, Link, redirect, useLoaderData } from '@remix-run/react'
-import { gamesTable, teamsTable } from '~/utils/indexeddb'
-import { game_uuid } from '~/utils/uuid'
+import { createGame } from '~/utils/games'
+import { getTeams } from '~/utils/teams'
 
 export const clientLoader = async () => {
-  const teams: any[] = []
+  const teams = await getTeams()
 
-  await teamsTable.iterate((value: Record<string, any>, key) => {
-    teams.push({ id: key, ...value })
-  })
   return {
-    teams: teams,
+    teams,
   }
 }
 
@@ -25,12 +22,9 @@ export const clientAction = async ({ request }: ClientActionFunctionArgs) => {
     return null
   }
 
-  await gamesTable.setItem(game_uuid(), {
-    homeTeamId: data.homeTeam,
-    awayTeamId: data.awayTeam,
-    shots: [],
-    createdAt: new Date(),
-    updatedAt: new Date(),
+  await createGame({
+    homeTeamId: data.homeTeam.toString().trim(),
+    awayTeamId: data.awayTeam.toString().trim(),
   })
 
   throw redirect('/games')

@@ -53,3 +53,7 @@ export async function getTeamById(teamId: string): Promise<Team | undefined> {
     players: players,
   }
 }
+
+export async function deleteTeam(teamId: string): Promise<void> {
+  await teamsTable.removeItem(teamId)
+}

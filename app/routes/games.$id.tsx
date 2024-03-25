@@ -44,7 +44,7 @@ export const clientAction = async ({ params, request }: ClientActionFunctionArgs
     throw redirect('/games')
   }
 
-  const game = await gamesTable.getItem(gameId)
+  const game = await getGameById(gameId)
   if (!game) {
     throw new Response('Game not found', { status: 404 })
   }
