@@ -1,3 +1,4 @@
-export function percentage(numerator: number, denominator: number) {
-  return numerator / denominator || 0 * 100
+export function percentage(numerator: number, denominator: number): number {
+  const calc = (numerator / denominator) * 100
+  return isNaN(calc) ? 0 : calc
 }

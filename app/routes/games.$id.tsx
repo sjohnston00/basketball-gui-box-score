@@ -5,7 +5,7 @@ import {
   redirect,
   useLoaderData,
 } from '@remix-run/react'
-import { useEffect, useRef } from 'react'
+import { forwardRef, useEffect, useRef, useState } from 'react'
 import { PopulatedGame, GameShot } from '~/utils/types/game'
 import { getGameById } from '~/utils/games'
 import { gamesTable } from '~/utils/indexeddb'
@@ -25,6 +25,8 @@ export const clientLoader = async ({ params }: ClientLoaderFunctionArgs) => {
     throw new Response('Game not found', { status: 404 })
   }
 
+  const allGamePlayers = [...game.homeTeam.players, ...game.awayTeam.players]
+
   //TODO: filter the assist players select box by players on their team
   //TODO: add isThreePointer boolean to shot object and calculate score based on that
   //TODO: add freeThrow shots array to game object and calculate score based on that
@@ -35,6 +37,7 @@ export const clientLoader = async ({ params }: ClientLoaderFunctionArgs) => {
   currentGame = game
   return {
     game,
+    allGamePlayers,
   }
 }
 
@@ -54,6 +57,8 @@ export const clientAction = async ({ params, request }: ClientActionFunctionArgs
 
   const shotPlayerId = data.shotPlayerId
   const assistPlayerId = data.assistPlayerId
+  console.log(data)
+
   const shotMade = data.shotMade === 'true'
 
   const playerTeamId = currentGame?.homeTeam.players.find(
@@ -89,10 +94,9 @@ export const clientAction = async ({ params, request }: ClientActionFunctionArgs
 }
 
 export default function Page() {
-  const { game } = useLoaderData<typeof clientLoader>()
+  const { game, allGamePlayers } = useLoaderData<typeof clientLoader>()
   const dialogRef = useRef<HTMLDialogElement>(null)
-  const dialogDivRef = useRef<HTMLDivElement>(null)
-  const addShotFormRef = useRef<HTMLFormElement>(null)
+
   const homeTeamName = game.homeTeam.name
   const awayTeamName = game.awayTeam.name
   const homeTeamScore = game.homeTeamScore
@@ -100,73 +104,15 @@ export default function Page() {
 
   useEffect(() => {
     dialogRef.current?.addEventListener('click', () => dialogRef.current?.close())
-    dialogDivRef.current?.addEventListener('click', (e) => e.stopPropagation())
 
     return () => {
       dialogRef.current?.removeEventListener('click', () => dialogRef.current?.close())
-      dialogDivRef.current?.removeEventListener('click', (e) => e.stopPropagation())
     }
   }, [])
 
   return (
     <div>
-      <dialog ref={dialogRef}>
-        <div ref={dialogDivRef} className="p-4">
-          <div className="flex justify-between items-center">
-            <h1>Add shot</h1>
-            <form method="dialog">
-              <button>x</button>
-            </form>
-          </div>
-          <Form
-            ref={addShotFormRef}
-            method="post"
-            className="w-full"
-            onSubmit={() => {
-              dialogRef.current?.close()
-            }}
-          >
-            <div className="my-4 flex justify-around items-center gap-2">
-              <label>
-                <input type="radio" name="shotMade" value="true" required />
-                make
-              </label>
-              <label>
-                <input type="radio" name="shotMade" value="false" required />
-                miss
-              </label>
-            </div>
-            <h2>Player shot</h2>
-            <select name="shotPlayerId" id="shotPlayerId" required>
-              {game.homeTeam.players.map((player) => (
-                <option key={player.id} value={player.id}>
-                  {player.name}
-                </option>
-              ))}
-              {game.awayTeam.players.map((player) => (
-                <option key={player.id} value={player.id}>
-                  {player.name}
-                </option>
-              ))}
-            </select>
-            <h2>Assisted by</h2>
-            <select name="assistPlayerId" id="assistPlayerId">
-              <option value="">No assist</option>
-              {game.homeTeam.players.map((player) => (
-                <option key={player.id} value={player.id}>
-                  {player.name}
-                </option>
-              ))}
-              {game.awayTeam.players.map((player) => (
-                <option key={player.id} value={player.id}>
-                  {player.name}
-                </option>
-              ))}
-            </select>
-            <button className="block w-full mt-4 p-2 rounded">save</button>
-          </Form>
-        </div>
-      </dialog>
+      <AddShotDialog game={game} allGamePlayers={allGamePlayers} ref={dialogRef} />
       <h1>Games</h1>
       <div className="flex justify-evenly mb-8">
         <div className="flex flex-col items-center">
@@ -241,6 +187,7 @@ function BoxScoreTable({ players, shots }: BoxScoreTableProps) {
             playersTwoPointsMade.length,
             playersTwoPointShots.length
           ).toFixed(0)
+
           const playersPoints = playersTwoPointsMade.length * 2
 
           const playersAssists = shots.filter((shot) => shot.assistPlayerId === player.id)
@@ -272,3 +219,103 @@ function BoxScoreTable({ players, shots }: BoxScoreTableProps) {
     </table>
   )
 }
+
+type AddShotDialogProps = {
+  game: PopulatedGame
+  allGamePlayers: Player[]
+}
+const AddShotDialog = forwardRef<HTMLDialogElement, AddShotDialogProps>(function AddShotDialog(
+  { game, allGamePlayers },
+  dialogRef
+) {
+  const dialogDivRef = useRef<HTMLDivElement>(null)
+  const addShotFormRef = useRef<HTMLFormElement>(null)
+  const [selectedPlayerShot, setSelectedPlayerShot] = useState<Player | undefined>(undefined)
+
+  useEffect(() => {
+    dialogDivRef.current?.addEventListener('click', (e) => e.stopPropagation())
+
+    return () => {
+      dialogDivRef.current?.removeEventListener('click', (e) => e.stopPropagation())
+    }
+  }, [])
+  return (
+    <dialog ref={dialogRef}>
+      <div ref={dialogDivRef} className="p-4">
+        <div className="flex justify-between items-center">
+          <h1>Add shot</h1>
+          <form
+            method="dialog"
+            onSubmit={() => {
+              addShotFormRef.current?.reset()
+            }}
+          >
+            <button>x</button>
+          </form>
+        </div>
+        <Form
+          ref={addShotFormRef}
+          method="post"
+          className="w-full"
+          onSubmit={() => {
+            dialogRef?.current?.close()
+          }}
+        >
+          <div className="my-4 flex justify-around items-center gap-2">
+            <label>
+              <input type="radio" name="shotMade" id="shotMadeTrue" value="true" required />
+              make
+            </label>
+            <label>
+              <input type="radio" name="shotMade" id="shotMadeFalse" value="false" required />
+              miss
+            </label>
+          </div>
+          <h2>Player shot</h2>
+          <select
+            name="shotPlayerId"
+            id="shotPlayerId"
+            value={selectedPlayerShot?.id}
+            onChange={(e) => {
+              const player = allGamePlayers.find((player) => player.id === e.target.value)
+              setSelectedPlayerShot(player)
+            }}
+            defaultValue=""
+            required
+          >
+            <option value="" disabled></option>
+            <optgroup label="Home Team">
+              {game.homeTeam.players.map((player) => (
+                <option key={player.id} value={player.id}>
+                  {player.name}
+                </option>
+              ))}
+            </optgroup>
+            <optgroup label="Away Team">
+              {game.awayTeam.players.map((player) => (
+                <option key={player.id} value={player.id}>
+                  {player.name}
+                </option>
+              ))}
+            </optgroup>
+          </select>
+
+          <h2>Assisted by</h2>
+          <select name="assistPlayerId" id="assistPlayerId">
+            <option value="">No assist</option>
+            {allGamePlayers
+              .filter(
+                (p) => p.teamId === selectedPlayerShot?.teamId && p.id !== selectedPlayerShot?.id
+              )
+              .map((player) => (
+                <option key={player.id} value={player.id}>
+                  {player.name}
+                </option>
+              ))}
+          </select>
+          <button className="block w-full mt-4 p-2 rounded">save</button>
+        </Form>
+      </div>
+    </dialog>
+  )
+})
