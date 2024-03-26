@@ -30,6 +30,12 @@ export async function createGame(newGame: NewGame): Promise<void> {
     updatedAt: new Date(),
     finished: false,
     shots: [],
+    rebounds: [],
+    freeThrows: [],
+    blocks: [],
+    steals: [],
+    turnovers: [],
+    fouls: [],
   }
   await gamesTable.setItem<IndexedDBGame>(game_uuid(), data)
 }
@@ -49,11 +55,11 @@ export async function getGameById(gameId: string): Promise<PopulatedGame | undef
 
   return {
     id: gameId,
+    ...game,
     homeTeam: homeTeam!,
     awayTeam: awayTeam!,
     homeTeamScore,
     awayTeamScore,
-    ...game,
   }
 }
 
@@ -61,10 +67,29 @@ export function getGameScore(game: IndexedDBGame): {
   homeTeamScore: number
   awayTeamScore: number
 } {
-  console.error('function getGameScore() NOT YET IMPLEMENTED')
+  const gameMadeShots = game.shots.filter((s) => s.made)
+  const gameMadeFreeThrow = game.freeThrows.filter((ft) => ft.made)
+
+  const homeTeamMadeShots = gameMadeShots.filter((s) => s.playerTeamId === game.homeTeamId)
+  const homeTeamTwoPointers = homeTeamMadeShots.filter((s) => !s.isThreePointer).length
+  const homeTeamThreePointers = homeTeamMadeShots.filter((s) => s.isThreePointer).length
+  const homeTeamFreeThrows = gameMadeFreeThrow.filter(
+    (ft) => ft.playerTeamId === game.homeTeamId
+  ).length
+
+  const awayTeamMadeShots = gameMadeShots.filter((s) => s.playerTeamId === game.awayTeamId)
+  const awayTeamTwoPointers = awayTeamMadeShots.filter((s) => !s.isThreePointer).length
+  const awayTeamThreePointers = awayTeamMadeShots.filter((s) => s.isThreePointer).length
+  const awayTeamFreeThrows = gameMadeFreeThrow.filter(
+    (ft) => ft.playerTeamId === game.awayTeamId
+  ).length
+
+  const homeTeamScore = homeTeamTwoPointers * 2 + homeTeamThreePointers * 3 + homeTeamFreeThrows
+  const awayTeamScore = awayTeamTwoPointers * 2 + awayTeamThreePointers * 3 + awayTeamFreeThrows
+
   return {
-    homeTeamScore: 0,
-    awayTeamScore: 0,
+    homeTeamScore,
+    awayTeamScore,
   }
 }
 

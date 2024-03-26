@@ -6,7 +6,7 @@ import {
   useLoaderData,
 } from '@remix-run/react'
 import { forwardRef, useEffect, useRef, useState } from 'react'
-import { PopulatedGame, GameShot } from '~/utils/types/game'
+import { PopulatedGame, GameShot, GameFreeThrow, GameStat, GameRebound } from '~/utils/types/game'
 import { getGameById } from '~/utils/games'
 import { gamesTable } from '~/utils/indexeddb'
 import { Player } from '~/utils/types/player'
@@ -27,11 +27,6 @@ export const clientLoader = async ({ params }: ClientLoaderFunctionArgs) => {
 
   const allGamePlayers = [...game.homeTeam.players, ...game.awayTeam.players]
 
-  //TODO: filter the assist players select box by players on their team
-  //TODO: add isThreePointer boolean to shot object and calculate score based on that
-  //TODO: add freeThrow shots array to game object and calculate score based on that
-  //TODO: add total footer rows for each team box score table and calculate totals
-  //TODO: calculate percentages based for shot types
   //TODO: add column for total FGM, FGA and FG%
 
   currentGame = game
@@ -57,7 +52,6 @@ export const clientAction = async ({ params, request }: ClientActionFunctionArgs
 
   const shotPlayerId = data.shotPlayerId
   const assistPlayerId = data.assistPlayerId
-  console.log(data)
 
   const shotMade = data.shotMade === 'true'
 
@@ -80,6 +74,9 @@ export const clientAction = async ({ params, request }: ClientActionFunctionArgs
     made: shotMade,
     assistPlayerId: shotMade && assistPlayerId ? assistPlayerId.toString() : undefined,
     createdAt: new Date(),
+    x: 0,
+    y: 0,
+    isThreePointer: false,
   })
 
   await gamesTable.setItem(gameId, {
@@ -139,11 +136,29 @@ export default function Page() {
           <div className="flex justify-between items-center">
             <span>{homeTeamName}</span>
           </div>
-          <BoxScoreTable players={game.homeTeam.players} shots={game.shots} />
+          <BoxScoreTable
+            players={game.homeTeam.players}
+            freeThrows={game.freeThrows.filter((ft) => ft.playerTeamId === game.homeTeamId)}
+            steals={game.steals.filter((st) => st.playerTeamId === game.homeTeamId)}
+            shots={game.shots.filter((s) => s.playerTeamId === game.homeTeamId)}
+            blocks={game.blocks.filter((b) => b.playerTeamId === game.homeTeamId)}
+            fouls={game.fouls.filter((f) => f.playerTeamId === game.homeTeamId)}
+            turnovers={game.turnovers.filter((to) => to.playerTeamId === game.homeTeamId)}
+            rebounds={game.rebounds.filter((r) => r.playerTeamId === game.homeTeamId)}
+          />
           <div className="flex justify-between items-center mt-4">
             <span>{awayTeamName}</span>
           </div>
-          <BoxScoreTable players={game.awayTeam.players} shots={game.shots} />
+          <BoxScoreTable
+            players={game.awayTeam.players}
+            freeThrows={game.freeThrows.filter((ft) => ft.playerTeamId === game.homeTeamId)}
+            steals={game.steals.filter((st) => st.playerTeamId === game.awayTeamId)}
+            shots={game.shots.filter((s) => s.playerTeamId === game.awayTeamId)}
+            blocks={game.blocks.filter((b) => b.playerTeamId === game.awayTeamId)}
+            fouls={game.fouls.filter((f) => f.playerTeamId === game.awayTeamId)}
+            turnovers={game.turnovers.filter((to) => to.playerTeamId === game.awayTeamId)}
+            rebounds={game.rebounds.filter((r) => r.playerTeamId === game.awayTeamId)}
+          />
         </div>
       </div>
     </div>
@@ -153,8 +168,57 @@ export default function Page() {
 type BoxScoreTableProps = {
   players: Player[]
   shots: GameShot[]
+  rebounds: GameRebound[]
+  freeThrows: GameFreeThrow[]
+  steals: GameStat[]
+  blocks: GameStat[]
+  turnovers: GameStat[]
+  fouls: GameStat[]
 }
-function BoxScoreTable({ players, shots }: BoxScoreTableProps) {
+function BoxScoreTable({
+  players,
+  shots,
+  freeThrows,
+  steals,
+  blocks,
+  turnovers,
+  fouls,
+  rebounds,
+}: BoxScoreTableProps) {
+  const madeShots = shots.filter((s) => s.made)
+  const madeFreeThrows = freeThrows.filter((ft) => ft.made)
+
+  //TODO: add the total made free throws to the total points as well
+  const totalPoints =
+    madeShots.reduce((acc, curr) => (curr.isThreePointer ? acc + 3 : acc + 2), 0) +
+    madeFreeThrows.length
+  const totalAssists = madeShots.filter((s) => s.assistPlayerId).length
+  const totalTwoPointersMade = madeShots.filter((s) => !s.isThreePointer).length
+  const totalTwoPointersAttempted = shots.filter((s) => !s.isThreePointer).length
+  const totalTwoPointerPercentage = percentage(
+    totalTwoPointersMade,
+    totalTwoPointersAttempted
+  ).toFixed(0)
+
+  const totalThreePointersMade = madeShots.filter((s) => s.isThreePointer).length
+  const totalThreePointersAttempted = shots.filter((s) => s.isThreePointer).length
+  const totalThreePointerPercentage = percentage(
+    totalThreePointersMade,
+    totalThreePointersAttempted
+  ).toFixed(0)
+
+  const totalFreeThrowsMade = freeThrows.filter((s) => s.made).length
+  const totalFreeThrowsAttempted = freeThrows.length
+  const totalFreeThrowsPercentage = percentage(
+    totalFreeThrowsMade,
+    totalFreeThrowsAttempted
+  ).toFixed(0)
+
+  const totalRebounds = rebounds.length
+  const totalSteals = steals.length
+  const totalBlocks = blocks.length
+  const totalTurnovers = turnovers.length
+  const totalFouls = fouls.length
   return (
     <table className="w-full box-score-table">
       <thead>
@@ -181,16 +245,43 @@ function BoxScoreTable({ players, shots }: BoxScoreTableProps) {
       </thead>
       <tbody>
         {players.map((player) => {
-          const playersTwoPointShots = shots.filter((shot) => shot.playerId === player.id)
-          const playersTwoPointsMade = playersTwoPointShots.filter((shot) => shot.made)
-          const playersTwoPointPercentage = percentage(
-            playersTwoPointsMade.length,
-            playersTwoPointShots.length
+          const playerShots = shots.filter((shot) => shot.playerId === player.id)
+          const playerFreeThrows = freeThrows.filter((ft) => ft.playerId === player.id)
+
+          const playersTwoPointersAttempted = playerShots.filter((shot) => !shot.isThreePointer)
+          const playersTwoPointersMade = playersTwoPointersAttempted.filter((shot) => shot.made)
+          const playersTwoPointersPercentage = percentage(
+            playersTwoPointersMade.length,
+            playersTwoPointersAttempted.length
           ).toFixed(0)
 
-          const playersPoints = playersTwoPointsMade.length * 2
+          const playersThreePointersAttempted = playerShots.filter((shot) => shot.isThreePointer)
+          const playersThreePointersMade = playersThreePointersAttempted.filter((shot) => shot.made)
+          const playersThreePointersPercentage = percentage(
+            playersThreePointersMade.length,
+            playersThreePointersAttempted.length
+          ).toFixed(0)
 
+          const playersFreeThrowsAttempted = playerFreeThrows
+          const playersFreeThrowsMade = playersFreeThrowsAttempted.filter((shot) => shot.made)
+          const playersFreeThrowsPercentage = percentage(
+            playersFreeThrowsMade.length,
+            playersFreeThrowsAttempted.length
+          ).toFixed(0)
+
+          const playersPoints =
+            playersTwoPointersMade.length * 2 +
+            playersThreePointersMade.length * 3 +
+            playersFreeThrowsMade.length
           const playersAssists = shots.filter((shot) => shot.assistPlayerId === player.id)
+          const playersRebounds = rebounds.filter((r) => r.playerId === player.id).length
+
+          const playersSteals = steals.filter((s) => s.playerId === player.id).length
+          const playersBlocks = blocks.filter((b) => b.playerId === player.id).length
+
+          const playersTurnovers = turnovers.filter((t) => t.playerId === player.id).length
+
+          const playersFouls = fouls.filter((f) => f.playerId === player.id).length
 
           return (
             <tr key={player.id}>
@@ -198,24 +289,46 @@ function BoxScoreTable({ players, shots }: BoxScoreTableProps) {
               <td className="!text-left">{player.name}</td>
               <td>{playersPoints}</td>
               <td>{playersAssists.length}</td>
-              <td>{player.rebounds || 0}</td>
-              <td>{playersTwoPointsMade.length}</td>
-              <td>{playersTwoPointShots.length}</td>
-              <td>{playersTwoPointPercentage}%</td>
-              <td>{player.threePointsMade || 0}</td>
-              <td>{player.threePointsAttempted || 0}</td>
-              <td>{player.threePointsPercentage || 0}%</td>
-              <td>{player.freeThrowsMade || 0}</td>
-              <td>{player.freeThrowsAttempted || 0}</td>
-              <td>{player.freeThrowsPercentage || 0}%</td>
-              <td>{player.steals || 0}</td>
-              <td>{player.blocks || 0}</td>
-              <td>{player.turnovers || 0}</td>
-              <td>{player.personalFouls || 0}</td>
+              <td>{playersRebounds}</td>
+              <td>{playersTwoPointersMade.length}</td>
+              <td>{playersTwoPointersAttempted.length}</td>
+              <td>{playersTwoPointersPercentage}%</td>
+              <td>{playersThreePointersMade.length}</td>
+              <td>{playersThreePointersAttempted.length}</td>
+              <td>{playersThreePointersPercentage}%</td>
+              <td>{playersFreeThrowsMade.length}</td>
+              <td>{playersFreeThrowsAttempted.length}</td>
+              <td>{playersFreeThrowsPercentage}%</td>
+              <td>{playersSteals}</td>
+              <td>{playersBlocks}</td>
+              <td>{playersTurnovers}</td>
+              <td>{playersFouls}</td>
             </tr>
           )
         })}
       </tbody>
+      <tfoot>
+        <tr>
+          <th>Total</th>
+          <th></th>
+          <th>{totalPoints}</th>
+          <th>{totalAssists}</th>
+          <th>{totalRebounds}</th>
+          <th>{totalTwoPointersMade}</th>
+          <th>{totalTwoPointersAttempted}</th>
+          <th>{totalTwoPointerPercentage}%</th>
+          <th>{totalThreePointersMade}</th>
+          <th>{totalThreePointersAttempted}</th>
+          <th>{totalThreePointerPercentage}%</th>
+          <th>{totalFreeThrowsMade}</th>
+          <th>{totalFreeThrowsAttempted}</th>
+          <th>{totalFreeThrowsPercentage}%</th>
+          <th>{totalSteals}</th>
+          <th>{totalBlocks}</th>
+          <th>{totalTurnovers}</th>
+          <th>{totalFouls}</th>
+        </tr>
+      </tfoot>
     </table>
   )
 }
@@ -284,14 +397,14 @@ const AddShotDialog = forwardRef<HTMLDialogElement, AddShotDialogProps>(function
             required
           >
             <option value="" disabled></option>
-            <optgroup label="Home Team">
+            <optgroup label={game.homeTeam.name}>
               {game.homeTeam.players.map((player) => (
                 <option key={player.id} value={player.id}>
                   {player.name}
                 </option>
               ))}
             </optgroup>
-            <optgroup label="Away Team">
+            <optgroup label={game.awayTeam.name}>
               {game.awayTeam.players.map((player) => (
                 <option key={player.id} value={player.id}>
                   {player.name}
